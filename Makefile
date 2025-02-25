@@ -30,7 +30,7 @@ stb:
 	wget -O include/stb_image_write.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image_write.h
 	wget -O include/stb_image_resize2.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image_resize2.h
 	wget -O include/stb_perline.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_perlin.h
-	wget -O include/stb_tilemap_editor.h https://github.com/nothings/stb/blob/master/stb_tilemap_editor.h
+	wget -O include/stb_tilemap_editor.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_tilemap_editor.h
 
 json:
 	wget -O include/json.h https://raw.githubusercontent.com/sheredom/json.h/refs/heads/master/json.h
