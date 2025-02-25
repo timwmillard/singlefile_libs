@@ -1,9 +1,12 @@
 
-all: mkdir sokol nuklear miniaudio stb json \
+all: mkdir arena sokol nuklear miniaudio stb json \
 	jsonc jsmn uuid
 
 mkdir:
 	mkdir -p include
+
+arena:
+	wget -O include/arena.h https://raw.githubusercontent.com/tsoding/arena/refs/heads/master/arena.h
 
 sokol:
 	wget -O include/sokol_app.h https://raw.githubusercontent.com/floooh/sokol/master/sokol_app.h
