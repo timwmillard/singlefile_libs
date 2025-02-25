@@ -8,6 +8,15 @@ mkdir:
 arena:
 	wget -O include/arena.h https://raw.githubusercontent.com/tsoding/arena/refs/heads/master/arena.h
 
+stb:
+	wget -O include/stb_ds.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_ds.h
+	wget -O include/stb_image.h https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
+	wget -O include/stb_truetype.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_truetype.h
+	wget -O include/stb_image_write.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image_write.h
+	wget -O include/stb_image_resize2.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image_resize2.h
+	wget -O include/stb_perline.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_perlin.h
+	wget -O include/stb_tilemap_editor.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_tilemap_editor.h
+
 sokol:
 	wget -O include/sokol_app.h https://raw.githubusercontent.com/floooh/sokol/master/sokol_app.h
 	wget -O include/sokol_audio.h https://raw.githubusercontent.com/floooh/sokol/master/sokol_audio.h
@@ -23,15 +32,6 @@ nuklear:
 miniaudio:
 	wget -O include/miniaudio.h https://raw.githubusercontent.com/mackron/miniaudio/refs/heads/master/miniaudio.h
 
-stb:
-	wget -O include/stb_ds.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_ds.h
-	wget -O include/stb_image.h https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
-	wget -O include/stb_truetype.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_truetype.h
-	wget -O include/stb_image_write.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image_write.h
-	wget -O include/stb_image_resize2.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image_resize2.h
-	wget -O include/stb_perline.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_perlin.h
-	wget -O include/stb_tilemap_editor.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_tilemap_editor.h
-
 json:
 	wget -O include/json.h https://raw.githubusercontent.com/sheredom/json.h/refs/heads/master/json.h
 
@@ -43,7 +43,6 @@ jsmn:
 
 uuid:
 	wget -O include/uuid.h https://raw.githubusercontent.com/wc-duck/uuid_h/refs/heads/master/uuid.h
-
 
 clay:
 	wget -O include/clay.h https://raw.githubusercontent.com/nicbarker/clay/refs/heads/main/clay.h
