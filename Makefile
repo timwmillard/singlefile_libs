@@ -47,3 +47,6 @@ uuid:
 clay:
 	wget -O include/clay.h https://raw.githubusercontent.com/nicbarker/clay/refs/heads/main/clay.h
 
+nob:
+	wget -O include/nob.h https://raw.githubusercontent.com/tsoding/nob.h/refs/heads/main/nob.h
+
