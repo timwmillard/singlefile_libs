@@ -22,9 +22,9 @@ https://github.com/ColleagueRiley
 
 ## Spips
 
-Spins contain simple little bits of code, that you just copy and paste into
+Snips contain simple little bits of code, that you just copy and paste into
 your own repo.
 
-> A little copying is better than a little dependency.
-> - Rob Pike
+> A little copying is better than a little dependency.  
+> **— Rob Pike**
 
