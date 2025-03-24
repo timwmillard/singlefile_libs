@@ -25,6 +25,7 @@ sokol:
 	wget -O include/sokol_time.h https://raw.githubusercontent.com/floooh/sokol/master/sokol_time.h
 	wget -O include/sokol_log.h https://raw.githubusercontent.com/floooh/sokol/master/sokol_log.h
 	wget -O include/sokol_nuklear.h https://github.com/floooh/sokol/raw/refs/heads/master/util/sokol_nuklear.h
+	wget -O include/sokol_fetch.h https://raw.githubusercontent.com/floooh/sokol/refs/heads/master/sokol_fetch.h
 
 nuklear:
 	wget -O include/nuklear.h https://github.com/Immediate-Mode-UI/Nuklear/raw/refs/heads/master/nuklear.h
