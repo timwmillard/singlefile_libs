@@ -51,6 +51,9 @@ clay:
 nob:
 	wget -O include/nob.h https://raw.githubusercontent.com/tsoding/nob.h/refs/heads/main/nob.h
 
+flag:
+	wget -O include/flag.h https://raw.githubusercontent.com/tsoding/flag.h/refs/heads/master/flag.h
+
 luigi:
 	wget -O include/luigi3.h https://raw.githubusercontent.com/nakst/luigi/refs/heads/main/experimental/luigi3.h
 
