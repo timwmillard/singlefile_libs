@@ -53,6 +53,7 @@ uuid:
 
 clay:
 	wget -O deps/clay.h https://raw.githubusercontent.com/nicbarker/clay/refs/heads/main/clay.h
+	wget -O deps/sokol_clay.h https://github.com/nicbarker/clay/raw/refs/heads/main/renderers/sokol/sokol_clay.h
 
 nob:
 	wget -O deps/nob.h https://raw.githubusercontent.com/tsoding/nob.h/refs/heads/main/nob.h
