@@ -8,6 +8,9 @@ mkdir:
 arena:
 	wget -O include/arena.h https://raw.githubusercontent.com/tsoding/arena/refs/heads/master/arena.h
 
+math:
+	wget -O include/mate.h https://github.com/TomasBorquez/mate.h/raw/refs/heads/master/mate.h
+
 stb:
 	wget -O include/stb_ds.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_ds.h
 	wget -O include/stb_image.h https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
@@ -63,6 +66,12 @@ luigi:
 open-simplex-noise:
 	wget -O deps/open-simplex-noise.c https://raw.githubusercontent.com/smcameron/open-simplex-noise-in-c/refs/heads/master/open-simplex-noise.c
 	wget -O deps/open-simplex-noise.h https://raw.githubusercontent.com/smcameron/open-simplex-noise-in-c/refs/heads/master/open-simplex-noise.h
+
+minilua:
+	wget -O deps/minilua.h https://github.com/edubart/minilua/raw/refs/heads/main/minilua.h
+
+bear-http-client:
+	wget -O bear_https_client.c https://github.com/OUIsolutions/BearHttpsClient/releases/download/0.2.8/BearHttpsClientOne.c
 
 compile_flags.txt: FORCE
 	@echo "Generating compile_flags.txt for IDE support"
