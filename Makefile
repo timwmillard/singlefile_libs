@@ -71,7 +71,7 @@ minilua:
 	wget -O deps/minilua.h https://github.com/edubart/minilua/raw/refs/heads/main/minilua.h
 
 bear-http-client:
-	wget -O bear_https_client.c https://github.com/OUIsolutions/BearHttpsClient/releases/download/0.2.8/BearHttpsClientOne.c
+	wget -O deps/BearHttpsClientOne.c https://github.com/OUIsolutions/BearHttpsClient/releases/download/0.2.8/BearHttpsClientOne.c
 
 compile_flags.txt: FORCE
 	@echo "Generating compile_flags.txt for IDE support"
