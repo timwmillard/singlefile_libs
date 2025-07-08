@@ -8,7 +8,7 @@ mkdir:
 arena:
 	wget -O deps/arena.h https://raw.githubusercontent.com/tsoding/arena/refs/heads/master/arena.h
 
-math:
+mate:
 	wget -O deps/mate.h https://github.com/TomasBorquez/mate.h/raw/refs/heads/master/mate.h
 
 stb:
