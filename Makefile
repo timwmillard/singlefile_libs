@@ -78,6 +78,7 @@ bear-http-client:
 
 http:
 	wget -O deps/http.h https://github.com/mattiasgustavsson/libs/raw/refs/heads/main/http.h
+	wget -O deps/cute_tls.h https://github.com/RandyGaul/cute_headers/raw/refs/heads/master/cute_tls.h
 
 mongoose:
 	wget -O deps/mongoose.h https://github.com/cesanta/mongoose/raw/refs/heads/master/mongoose.h
