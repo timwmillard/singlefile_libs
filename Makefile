@@ -2,14 +2,15 @@
 all: mkdir arena sokol nuklear miniaudio stb json \
 	jsonc jsmn uuid
 
+# mate build system, lives in the root directory
+mate:
+	wget -O mate.h https://github.com/TomasBorquez/mate.h/raw/refs/heads/master/mate.h
+
 mkdir:
 	mkdir -p deps
 
 arena:
 	wget -O deps/arena.h https://raw.githubusercontent.com/tsoding/arena/refs/heads/master/arena.h
-
-mate:
-	wget -O deps/mate.h https://github.com/TomasBorquez/mate.h/raw/refs/heads/master/mate.h
 
 stb:
 	wget -O deps/stb_ds.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_ds.h
@@ -54,6 +55,7 @@ uuid:
 clay:
 	wget -O deps/clay.h https://raw.githubusercontent.com/nicbarker/clay/refs/heads/main/clay.h
 	wget -O deps/sokol_clay.h https://github.com/nicbarker/clay/raw/refs/heads/main/renderers/sokol/sokol_clay.h
+	wget -O deps/sokol_fontstash.h https://github.com/floooh/sokol/raw/refs/heads/master/util/sokol_fontstash.h
 
 nob:
 	wget -O deps/nob.h https://raw.githubusercontent.com/tsoding/nob.h/refs/heads/main/nob.h
@@ -73,6 +75,13 @@ minilua:
 
 bear-http-client:
 	wget -O deps/BearHttpsClientOne.c https://github.com/OUIsolutions/BearHttpsClient/releases/download/0.2.8/BearHttpsClientOne.c
+
+http:
+	wget -O deps/http.h https://github.com/mattiasgustavsson/libs/raw/refs/heads/main/http.h
+
+mongoose:
+	wget -O deps/mongoose.h https://github.com/cesanta/mongoose/raw/refs/heads/master/mongoose.h
+	wget -O deps/mongoose.c https://github.com/cesanta/mongoose/raw/refs/heads/master/mongoose.c
 
 compile_flags.txt: FORCE
 	@echo "Generating compile_flags.txt for IDE support"
