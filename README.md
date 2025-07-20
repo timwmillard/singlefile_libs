@@ -20,6 +20,10 @@ https://github.com/r-lyeh/single_file_libs
 
 https://github.com/ColleagueRiley
 
+https://github.com/RandyGaul/cute_headers
+
+https://github.com/floooh/sokol
+
 ## Spips
 
 Snips contain simple little bits of code, that you just copy and paste into

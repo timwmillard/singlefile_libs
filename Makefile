@@ -20,6 +20,7 @@ stb:
 	wget -O deps/stb_image_resize2.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image_resize2.h
 	wget -O deps/stb_perline.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_perlin.h
 	wget -O deps/stb_tilemap_editor.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_tilemap_editor.h
+	wget -O deps/stb_textedit.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_textedit.h
 
 sokol:
 	wget -O deps/sokol_app.h https://raw.githubusercontent.com/floooh/sokol/master/sokol_app.h
@@ -73,6 +74,12 @@ open-simplex-noise:
 minilua:
 	wget -O deps/minilua.h https://github.com/edubart/minilua/raw/refs/heads/main/minilua.h
 
+## Networking ##
+
+naett:
+	wget -O deps/naett.h https://github.com/erkkah/naett/raw/refs/heads/main/naett.h
+	wget -O deps/naett.c https://github.com/erkkah/naett/raw/refs/heads/main/naett.c
+
 bear-http-client:
 	wget -O deps/BearHttpsClientOne.c https://github.com/OUIsolutions/BearHttpsClient/releases/download/0.2.8/BearHttpsClientOne.c
 
@@ -83,6 +90,11 @@ http:
 mongoose:
 	wget -O deps/mongoose.h https://github.com/cesanta/mongoose/raw/refs/heads/master/mongoose.h
 	wget -O deps/mongoose.c https://github.com/cesanta/mongoose/raw/refs/heads/master/mongoose.c
+
+## Games ##
+
+cute_tiled:
+	wget -O deps/cute_tiled.h https://github.com/RandyGaul/cute_headers/raw/refs/heads/master/cute_tiled.h
 
 compile_flags.txt: FORCE
 	@echo "Generating compile_flags.txt for IDE support"
