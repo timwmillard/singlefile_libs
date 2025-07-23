@@ -50,8 +50,10 @@ jsonc:
 jsmn:
 	wget -O deps/jsmn.h https://raw.githubusercontent.com/zserge/jsmn/refs/heads/master/jsmn.h
 
+# https://github.com/LiosK/uuidv7-h
 uuid:
 	wget -O deps/uuid.h https://raw.githubusercontent.com/wc-duck/uuid_h/refs/heads/master/uuid.h
+	wget -O deps/uuidv7.h https://github.com/LiosK/uuidv7-h/raw/refs/heads/main/uuidv7.h
 
 clay:
 	wget -O deps/clay.h https://raw.githubusercontent.com/nicbarker/clay/refs/heads/main/clay.h
