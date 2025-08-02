@@ -26,4 +26,8 @@ int main() {
     print_array(arr);
     array_push(arr, 1);
     print_array(arr);
+    array_push(arr, 10);
+    print_array(arr);
+    array_push(arr, 19);
+    print_array(arr);
 }
