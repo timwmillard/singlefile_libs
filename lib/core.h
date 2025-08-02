@@ -40,8 +40,8 @@ typedef long double float128;
 
 /* end standard types */
 
-#ifndef CORE_ASSERT
-#define CORE_ASSERT assert
+#ifndef ASSERT
+#define ASSERT assert
 #include <assert.h>
 #endif
 
@@ -54,6 +54,7 @@ typedef long double float128;
 #define array_free(a)         ((a) ? free(array__raw(a)),0 : 0)
 #define array_push(a,v)       (array__maybegrow(a,1), (a)[array__n(a)++] = (v))
 #define array_count(a)        ((a) ? array__n(a) : 0)
+#define array_capacity(a)     ((a) ? array__m(a) : 0)
 #define array_add(a,n)        (array__maybegrow(a,n), array__n(a)+=(n), &(a)[array__n(a)-(n)])
 #define array_last(a)         ((a)[array__n(a)-1])
 
@@ -69,7 +70,7 @@ typedef long double float128;
 static void array__growf(void **arr, int increment, int itemsize)
 {
 	int m = *arr ? 2*array__m(*arr)+increment : increment+1;
-	void *p = realloc(*arr ? array__raw(*arr) : 0, itemsize * m + sizeof(int)*2);
+	void *p = reallocf(*arr ? array__raw(*arr) : 0, itemsize * m + sizeof(int)*2);
 	assert(p);
 	if (p) {
 		if (!*arr) ((int *) p)[1] = 0;
