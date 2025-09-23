@@ -98,6 +98,14 @@ mongoose:
 cute_tiled:
 	wget -O deps/cute_tiled.h https://github.com/RandyGaul/cute_headers/raw/refs/heads/master/cute_tiled.h
 
+
+## Database ##
+
+sqlite3:
+	wget -O deps/sqlite-amalgamation.zip https://sqlite.org/2025/sqlite-amalgamation-3500400.zip
+	unzip -j deps/sqlite-amalgamation.zip -d deps/
+	rm deps/sqlite-amalgamation.zip
+
 compile_flags.txt: FORCE
 	@echo "Generating compile_flags.txt for IDE support"
 	@echo $(CFLAGS) | tr ' ' '\n' > $@
