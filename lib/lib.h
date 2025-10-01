@@ -66,40 +66,6 @@ typedef long double float128;
 #include <assert.h>
 #endif
 
-// stretchy buffer
-// init: NULL 
-// free: array_free() 
-// push_back: array_push() 
-// size: array_count() 
-#define array_free(a)         ((a) ? free(array__raw(a)),0 : 0)
-#define array_push(a,v)       (array__maybegrow(a,1), (a)[array__n(a)++] = (v))
-#define array_count(a)        ((a) ? array__n(a) : 0)
-#define array_capacity(a)     ((a) ? array__m(a) : 0)
-#define array_add(a,n)        (array__maybegrow(a,n), array__n(a)+=(n), &(a)[array__n(a)-(n)])
-#define array_last(a)         ((a)[array__n(a)-1])
-
-#include <stdlib.h>
-#define array__raw(a) ((int *) (a) - 2)
-#define array__m(a)   array__raw(a)[0]
-#define array__n(a)   array__raw(a)[1]
-
-#define array__needgrow(a,n)  ((a)==0 || array__n(a)+n >= array__m(a))
-#define array__maybegrow(a,n) (array__needgrow(a,(n)) ? array__grow(a,n) : 0)
-#define array__grow(a,n)  array__growf((void **) &(a), (n), sizeof(*(a)))
-
-static void array__growf(void **arr, int increment, int itemsize)
-{
-	int m = *arr ? 2*array__m(*arr)+increment : increment+1;
-	void *p = reallocf(*arr ? array__raw(*arr) : 0, itemsize * m + sizeof(int)*2);
-	assert(p);
-	if (p) {
-		if (!*arr) ((int *) p)[1] = 0;
-		*arr = (void *) ((int *) p + 2);
-		array__m(*arr) = m;
-	}
-}
-
-
 #include <stddef.h>
 #include <stdint.h>
 
@@ -162,6 +128,46 @@ void arena_reset(Arena *a);
 void arena_rewind(Arena *a, Arena_Mark m);
 void arena_free(Arena *a);
 void arena_trim(Arena *a);
+
+
+// stretchy buffer
+// init: NULL 
+// free: array_free() 
+// push_back: array_push() 
+// size: array_count() 
+#define array_free(a)         ((a) ? free(array__raw(a)),0 : 0)
+#define array_push(a,v)       (array__maybegrow(a,1), (a)[array__n(a)++] = (v))
+#define array_count(a)        ((a) ? array__n(a) : 0)
+#define array_capacity(a)     ((a) ? array__m(a) : 0)
+#define array_add(a,n)        (array__maybegrow(a,n), array__n(a)+=(n), &(a)[array__n(a)-(n)])
+#define array_last(a)         ((a)[array__n(a)-1])
+#define array_arena(a, al)    (array__o(a) = al)
+
+#include <stdlib.h>
+#define array__raw(a) ((size_t *) (a) - 3)
+#define array__m(a)   array__raw(a)[0] // count
+#define array__n(a)   array__raw(a)[1] // capacity
+#define array__o(a)   array__raw(a)[2] // arena
+
+#define array__needgrow(a,n)  ((a)==0 || array__n(a)+n >= array__m(a))
+#define array__maybegrow(a,n) (array__needgrow(a,(n)) ? array__grow(a,n) : 0)
+#define array__grow(a,n)  array__growf((void **) &(a), (n), sizeof(*(a)))
+
+static void array__growf(void **arr, int increment, int itemsize)
+{
+	int m = *arr ? 2*array__m(*arr)+increment : increment+1;
+    void *p;
+    if (array__o(*arr))
+        p = arena_realloc((Arena*)array__o(*arr), *arr ? array__raw(*arr) : 0, array__n(*arr), itemsize * m + sizeof(size_t)*3);
+    else
+        p = reallocf(*arr ? array__raw(*arr) : 0, itemsize * m + sizeof(size_t)*3);
+	assert(p);
+	if (p) {
+		if (!*arr) ((int *) p)[1] = 0;
+		*arr = (void *) ((int *) p + 2);
+		array__m(*arr) = m;
+	}
+}
 
 #endif // LIB_H
 
