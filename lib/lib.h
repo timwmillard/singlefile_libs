@@ -99,7 +99,6 @@ static void array__growf(void **arr, int increment, int itemsize)
 	}
 }
 
-#endif // LIB_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -163,6 +162,8 @@ void arena_reset(Arena *a);
 void arena_rewind(Arena *a, Arena_Mark m);
 void arena_free(Arena *a);
 void arena_trim(Arena *a);
+
+#endif // LIB_H
 
 #ifdef LIB_IMPLEMENTATION
 
