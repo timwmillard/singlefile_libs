@@ -10,9 +10,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-typedef unsigned char byte;
 
 // unsigned integer type with width of exactly 8, 16, 32 and 64 bits respectively.
+typedef unsigned char byte;
 typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
