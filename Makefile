@@ -76,6 +76,9 @@ open-simplex-noise:
 minilua:
 	wget -O deps/minilua.h https://github.com/edubart/minilua/raw/refs/heads/main/minilua.h
 
+ckit:
+	wget -O deps/ckit.h https://github.com/RandyGaul/ckit.h/raw/refs/heads/main/ckit.h
+
 ## Networking ##
 
 naett:
