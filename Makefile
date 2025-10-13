@@ -96,6 +96,9 @@ mongoose:
 	wget -O deps/mongoose.h https://github.com/cesanta/mongoose/raw/refs/heads/master/mongoose.h
 	wget -O deps/mongoose.c https://github.com/cesanta/mongoose/raw/refs/heads/master/mongoose.c
 
+coroutines:
+	wget -O deps/minicoro.h https://github.com/edubart/minicoro/raw/refs/heads/main/minicoro.h
+
 ## Games ##
 
 cute_tiled:
