@@ -42,6 +42,7 @@ void *arena_alloc(arena *a, size_t size) {
         fprintf(stderr, "[ERROR] arena alloc too big\n");
         return NULL;
     }
+    // TODO: This logic is flawed
     byte *mem = a->next;
     if (a->start == NULL) {
         a->start = malloc(ARENA_PAGE_SIZE);
@@ -49,6 +50,11 @@ void *arena_alloc(arena *a, size_t size) {
             fprintf(stderr, "[ERROR] malloc out of memory\n");
             return NULL;
         }
+        mem = a->start;
+        a->next = a->start + size;
+        a->cap = ARENA_PAGE_SIZE;
+    } else {
+        mem = a->next;
         a->next = a->start + size;
     }
     return mem;
@@ -64,7 +70,7 @@ void arena_release(arena *a) {
     free(a->start);
 }
 
-string arena_string_new(arena *a, size_t capacity) {
+string string_arena_new(arena *a, size_t capacity) {
     char* data = arena_alloc(a, capacity + 1);
     data[0] = '\0';
     return (string){
@@ -77,16 +83,16 @@ string arena_string_new(arena *a, size_t capacity) {
 }
 
 // Create owned string from C string
-string arena_string_from(arena *a, const char* str) {
+string string_arena_from(arena *a, const char* str) {
     size_t len = strlen(str);
-    string s = arena_string_new(a, len);
+    string s = string_arena_new(a, len);
     strcpy(s.data, str);
     s.len = len;
     return s;
 }
 
 // Ensure capacity for owned strings
-void arena__string_reserve(arena *a, string* s, size_t new_cap) {
+void string_arena__reserve(string* s, arena *a, size_t new_cap) {
     if (!s->owned) {
         // Convert view to owned string
         char* old_data = s->data;
@@ -107,7 +113,7 @@ void string_append(string* s, const char* str) {
     size_t new_len = s->len + add_len;
     
     if (new_len > s->cap) {
-        arena__string_reserve(s->arena, s, new_len * 2);  // double capacity
+        string_arena__reserve(s, s->arena, new_len * 2);  // double capacity
     }
     
     strcpy(s->data + s->len, str);
@@ -126,7 +132,7 @@ string string_view(const char* str) {
 
 // Create owned string with capacity
 string string_new(size_t capacity) {
-    return arena_string_new(NULL, capacity);
+    return string_arena_new(NULL, capacity);
 }
 
 // Create owned string from C string
@@ -141,7 +147,7 @@ string string_from(const char* str) {
 // Append character
 void string_push(string* s, char c) {
     if (s->len + 1 > s->cap) {
-        arena__string_reserve(s->arena, s, (s->cap + 1) * 2);
+        string_arena__reserve(s, s->arena, (s->cap + 1) * 2);
     }
     s->data[s->len++] = c;
     s->data[s->len] = '\0';
@@ -215,7 +221,7 @@ const char *cstr(string *s)
 {
     // Make sure we have capacity for the null terminator
     if (s->len > s->cap) {
-        arena__string_reserve(s->arena, s, s->len * 2);  // double capacity
+        string_arena__reserve(s, s->arena, s->len * 2);  // double capacity
     }
     
     // Add null terminator
@@ -239,6 +245,34 @@ typedef struct {
     string* items;
     size_t count;
 } string_array;
+
+string_array string_array_arena_from(arena *a, char* array, int count) {
+    string_array sa;
+    sa.items = arena_alloc(a, sizeof(*sa.items) * count);
+    for (int i = 0; i < count; i++) {
+        sa.items[i] = string_from(&array[i]);
+    }
+    sa.count = count;
+    return sa;
+}
+
+string_array string_array_from(char* array, int count) {
+    return string_array_arena_from(NULL, array, count);
+}
+
+string_array string_array_arena_view(arena *a, char* array, int count) {
+    string_array sa;
+    sa.items = arena_alloc(a, sizeof(*sa.items) * count);
+    for (int i = 0; i < count; i++) {
+        sa.items[i] = string_view(&array[i]);
+    }
+    sa.count = count;
+    return sa;
+}
+
+string_array string_array_view(char* array, int count) {
+    return string_array_arena_view(NULL, array, count);
+}
 
 string_array string_split(string s, const char* delimiter) {
     // Count occurrences
@@ -401,6 +435,22 @@ void rebuild_self(int argc, char *argv[], const char *source) {
     if (needs_rebuild(self, source)) {
         printf("Rebuilding program...\n");
         if (!cmd(CC " -o %s %s", self, source)) {
+            exit(1);
+        }
+        
+        // Re-execute
+        execvp(self, argv);
+        perror("execvp");
+        exit(1);
+    }
+}
+void rebuild_deps(int argc, char *argv[], const char *sources[], int sources_count) {
+    (void)argc;
+    const char *self = argv[0];
+    
+    if (needs_rebuild_many(self, sources, sources_count)) {
+        printf("Rebuilding program...\n");
+        if (!cmd(CC " -o %s %s", self, sources[0])) {
             exit(1);
         }
         

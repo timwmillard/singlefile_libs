@@ -2,3 +2,6 @@
 CompileFlags:
   Add: [-xc]
 
+InlayHints:
+  Enabled: false
+
