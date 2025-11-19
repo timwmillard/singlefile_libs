@@ -112,6 +112,10 @@ sqlite3:
 	unzip -j deps/sqlite-amalgamation.zip -d deps/
 	rm deps/sqlite-amalgamation.zip
 
+## Testing ##
+testing:
+	wget -O deps/myassert.h https://github.com/savashn/myassert/raw/refs/heads/main/myassert.h
+
 compile_flags.txt: FORCE
 	@echo "Generating compile_flags.txt for IDE support"
 	@echo $(CFLAGS) | tr ' ' '\n' > $@

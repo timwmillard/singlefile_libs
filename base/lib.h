@@ -399,7 +399,7 @@ void rebuild_self(int argc, char *argv[], const char *source) {
     const char *self = argv[0];
     
     if (needs_rebuild(self, source)) {
-        printf("Rebuilding build program...\n");
+        printf("Rebuilding program...\n");
         if (!cmd(CC " -o %s %s", self, source)) {
             exit(1);
         }
