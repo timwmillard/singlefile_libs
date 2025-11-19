@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
         "lib_test.c",
         "lib.h",
     };
-    // rebuild_deps(argc, argv, deps, ARRAY_SIZE(deps));
+    rebuild_deps(argc, argv, deps, ARRAY_SIZE(deps));
 
     printf("--------------------\n");
     printf("\033[33mRunning Tests\033[0m\n");

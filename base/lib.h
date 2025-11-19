@@ -42,7 +42,6 @@ void *arena_alloc(arena *a, size_t size) {
         fprintf(stderr, "[ERROR] arena alloc too big\n");
         return NULL;
     }
-    // TODO: This logic is flawed
     byte *mem = a->next;
     if (a->start == NULL) {
         a->start = malloc(ARENA_PAGE_SIZE);
@@ -101,8 +100,13 @@ void string_arena__reserve(string* s, arena *a, size_t new_cap) {
         s->owned = true;
         s->cap = new_cap;
     } else if (new_cap > s->cap) {
-        // s->data = arena_realloc(a, s->data, new_cap + 1);
-        s->data = realloc(s->data, new_cap + 1); // TODO: use arena
+        if (s->arena) {
+            // Arena-allocated string: use arena_realloc
+            s->data = arena_realloc(s->arena, s->data, s->cap + 1, new_cap + 1);
+        } else {
+            // Heap-allocated string: use realloc
+            s->data = realloc(s->data, new_cap + 1);
+        }
         s->cap = new_cap;
     }
 }
