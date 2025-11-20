@@ -15,8 +15,11 @@ extern "C" {
 #include <ctype.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <assert.h>
 
 typedef unsigned char byte;
+
+#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
 #define ARENA_PAGE_SIZE 4096
 
@@ -34,6 +37,13 @@ typedef struct {
     arena *arena;
 } string;
 
+
+#if DEBUG
+void *null_malloc(size_t size) {
+    return NULL;
+}
+#endif
+
 void *arena_alloc(arena *a, size_t size) {
     if (a == NULL) {
         return malloc(size);
@@ -42,22 +52,17 @@ void *arena_alloc(arena *a, size_t size) {
         fprintf(stderr, "[ERROR] arena alloc too big\n");
         return NULL;
     }
-    byte *mem = a->next;
     if (a->start == NULL) {
         a->start = malloc(ARENA_PAGE_SIZE);
-        if (a->start == NULL) {
-            fprintf(stderr, "[ERROR] malloc out of memory\n");
-            return NULL;
-        }
-        mem = a->start;
-        a->next = a->start + size;
+        assert(a->start != NULL);
+        a->next = a->start;
         a->cap = ARENA_PAGE_SIZE;
-    } else {
-        mem = a->next;
-        a->next = a->start + size;
     }
+    byte *mem = a->next;
+    a->next += size;
     return mem;
 }
+
 void *arena_realloc(arena *a, void *old, size_t oldsize, size_t newsize) {
     byte *new = arena_alloc(a, newsize);
     memcpy(new, old, oldsize);
@@ -250,18 +255,20 @@ typedef struct {
     size_t count;
 } string_array;
 
-string_array string_array_arena_from(arena *a, char* array, int count) {
+#define string_array_arena_from(a, array) string_array_arena_from_count(a, array, ARRAY_SIZE(array))
+string_array string_array_arena_from_count(arena *a, const char* array[], int count) {
     string_array sa;
     sa.items = arena_alloc(a, sizeof(*sa.items) * count);
     for (int i = 0; i < count; i++) {
-        sa.items[i] = string_from(&array[i]);
+        sa.items[i] = string_from(array[i]);
     }
     sa.count = count;
     return sa;
 }
 
-string_array string_array_from(char* array, int count) {
-    return string_array_arena_from(NULL, array, count);
+#define string_array_from(array) string_array_from_count(array, ARRAY_SIZE(array))
+string_array string_array_from_count(const char* array[], int count) {
+    return string_array_arena_from_count(NULL, array, count);
 }
 
 string_array string_array_arena_view(arena *a, char* array, int count) {
@@ -334,8 +341,6 @@ string string_join(string_array arr, const char* separator) {
 }
 // ------------ STRING END
 
-
-#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
 // Platform detection
 #ifdef __APPLE__
@@ -420,9 +425,9 @@ bool needs_rebuild(const char *target, const char *source) {
 }
 
 // Multi-source dependency checking
-bool needs_rebuild_many(const char *target, const char *sources[], int count) {
-    for (int i = 0; i < count; i++) {
-        if (needs_rebuild(target, sources[i])) {
+bool needs_rebuild_many(const char *target, string_array sources) {
+    for (int i = 0; i < sources.count; i++) {
+        if (needs_rebuild(target, sources.items[i].data)) {
             return true;
         }
     }
@@ -448,13 +453,13 @@ void rebuild_self(int argc, char *argv[], const char *source) {
         exit(1);
     }
 }
-void rebuild_deps(int argc, char *argv[], const char *sources[], int sources_count) {
+void rebuild_deps(int argc, char *argv[], string_array sources) {
     (void)argc;
     const char *self = argv[0];
     
-    if (needs_rebuild_many(self, sources, sources_count)) {
+    if (needs_rebuild_many(self, sources)) {
         printf("Rebuilding program...\n");
-        if (!cmd(CC " -o %s %s", self, sources[0])) {
+        if (!cmd(CC " -o %s %s", self, sources.items[0])) {
             exit(1);
         }
         

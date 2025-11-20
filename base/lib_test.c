@@ -16,6 +16,7 @@ void test_arena() {
     printf("cap = %ld\n", a.cap);
 
 }
+
 void test_arena_string() {
     arena a = {0};
     string s = string_arena_from(&a, "Hello world\n");
@@ -33,8 +34,6 @@ void test_string() {
 
     string_append(&s, "Hello world\n");
     ASSERT_EQ_STR(s.data, "Hello world\nHello world\n");
-
-    // arena_release(&a);
 }
 
 int main(int argc, char *argv[]) {
@@ -43,7 +42,7 @@ int main(int argc, char *argv[]) {
         "lib_test.c",
         "lib.h",
     };
-    rebuild_deps(argc, argv, deps, ARRAY_SIZE(deps));
+    rebuild_deps(argc, argv, string_array_from(deps));
 
     printf("--------------------\n");
     printf("\033[33mRunning Tests\033[0m\n");
