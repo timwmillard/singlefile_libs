@@ -21,12 +21,18 @@ typedef unsigned char byte;
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
-#define ARENA_PAGE_SIZE 4096
+#define ARENA_REGION_DEFAULT_SIZE 4096
 
-typedef struct {
-    byte *start;
+typedef struct arena_region {
+    struct arena_region *next;
+    size_t len;
     size_t cap;
-    byte *next;
+    uintptr_t data[];
+} arena_region;
+
+typedef struct arena {
+    arena_region *start;
+    arena_region *end;
 } arena;
 
 typedef struct {
@@ -44,34 +50,70 @@ void *null_malloc(size_t size) {
 }
 #endif
 
-void *arena_alloc(arena *a, size_t size) {
-    if (a == NULL) {
-        return malloc(size);
-    }
-    if (size > ARENA_PAGE_SIZE) {
-        fprintf(stderr, "[ERROR] arena alloc too big\n");
-        return NULL;
-    }
-    if (a->start == NULL) {
-        a->start = malloc(ARENA_PAGE_SIZE);
-        assert(a->start != NULL);
-        a->next = a->start;
-        a->cap = ARENA_PAGE_SIZE;
-    }
-    byte *mem = a->next;
-    a->next += size;
-    return mem;
+// TODO: instead of accepting specific capacity new_region() should accept the size of the object we want to fit into the region
+// It should be up to new_region() to decide the actual capacity to allocate
+arena_region *_arena_new_region(size_t cap) {
+    size_t size_bytes = sizeof(arena_region) + sizeof(uintptr_t)*cap;
+    arena_region *r = (arena_region*)malloc(size_bytes);
+    assert(r);
+    r->next = NULL;
+    r->len = 0;
+    r->cap = cap;
+    return r;
 }
 
-void *arena_realloc(arena *a, void *old, size_t oldsize, size_t newsize) {
-    byte *new = arena_alloc(a, newsize);
-    memcpy(new, old, oldsize);
-    return new;
+void _arena_free_region(arena_region *r) {
+    free(r);
+}
+
+void *arena_alloc(arena *a, size_t size_bytes) {
+    size_t size = (size_bytes + sizeof(uintptr_t) - 1)/sizeof(uintptr_t);
+
+    if (a->end == NULL) {
+        assert(a->start == NULL);
+        size_t capacity = ARENA_REGION_DEFAULT_SIZE;
+        if (capacity < size) capacity = size;
+        a->end = _arena_new_region(capacity);
+        a->start = a->end;
+    }
+
+    while (a->end->len + size > a->end->cap && a->end->next != NULL) {
+        a->end = a->end->next;
+    }
+
+    if (a->end->len + size > a->end->cap) {
+        assert(a->end->next == NULL);
+        size_t capacity = ARENA_REGION_DEFAULT_SIZE;
+        if (capacity < size) capacity = size;
+        a->end->next = _arena_new_region(capacity);
+        a->end = a->end->next;
+    }
+
+    void *result = &a->end->data[a->end->len];
+    a->end->len += size;
+    return result;
+}
+
+void *arena_realloc(arena *a, void *oldptr, size_t oldsz, size_t newsz) {
+    if (newsz <= oldsz) return oldptr;
+    void *newptr = arena_alloc(a, newsz);
+    char *newptr_char = (char*)newptr;
+    char *oldptr_char = (char*)oldptr;
+    for (size_t i = 0; i < oldsz; ++i) {
+        newptr_char[i] = oldptr_char[i];
+    }
+    return newptr;
 }
 
 void arena_release(arena *a) {
-    if (!a) return;
-    free(a->start);
+    arena_region *r = a->start;
+    while (r) {
+        arena_region *r0 = r;
+        r = r->next;
+        _arena_free_region(r0);
+    }
+    a->start = NULL;
+    a->end = NULL;
 }
 
 string string_arena_new(arena *a, size_t capacity) {
@@ -226,8 +268,7 @@ string string_lower(string s) {
 }
 
 // Returns the string as a null-terminated C string
-const char *cstr(string *s)
-{
+const char *cstr(string *s) {
     // Make sure we have capacity for the null terminator
     if (s->len > s->cap) {
         string_arena__reserve(s, s->arena, s->len * 2);  // double capacity
@@ -368,8 +409,7 @@ string string_join(string_array arr, const char* separator) {
     #endif
 #endif
 
-bool cmd_v(const char *fmt, va_list args)
-{
+bool cmd_v(const char *fmt, va_list args) {
     char buffer[4096];
     vsnprintf(buffer, sizeof(buffer), fmt, args);
     
@@ -377,8 +417,7 @@ bool cmd_v(const char *fmt, va_list args)
     return system(buffer) == 0;
 }
 
-bool cmd(const char *fmt, ...)
-{
+bool cmd(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     bool result = cmd_v(fmt, args);
@@ -386,8 +425,7 @@ bool cmd(const char *fmt, ...)
     return result;
 }
 
-bool cmd_string(string fmt, ...)
-{
+bool cmd_string(string fmt, ...) {
     va_list args;
     va_start(args, fmt);
     bool result = cmd_v(fmt.data, args);
@@ -479,8 +517,7 @@ void join_strings(char *buffer, size_t size, const char *sources[], size_t sourc
     }
 }
 
-int bin2c(char *bin_file, char *c_file, char *opt_name)
-{
+int bin2c(char *bin_file, char *c_file, char *opt_name) {
     const char *name;
     FILE *input, *output;
     unsigned int length = 0;

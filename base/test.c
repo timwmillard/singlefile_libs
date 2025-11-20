@@ -12,8 +12,6 @@ void test_arena() {
     byte *data = arena_alloc(&a, 10);
 
     printf("start = %p\n", a.start);
-    printf("next = %p\n", a.next);
-    printf("cap = %ld\n", a.cap);
 
 }
 
@@ -39,10 +37,10 @@ void test_string() {
 int main(int argc, char *argv[]) {
     // REBUILD_SELF(argc, argv);
     const char *deps[] = {
-        "lib_test.c",
-        "lib.h",
+        "test.c",
+        "base.h",
     };
-    rebuild_deps(argc, argv, string_array_from(deps));
+    // rebuild_deps(argc, argv, string_array_from(deps));
 
     printf("--------------------\n");
     printf("\033[33mRunning Tests\033[0m\n");
