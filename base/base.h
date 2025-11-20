@@ -1,5 +1,5 @@
-#ifndef LIB_H
-#define LIB_H
+#ifndef BASE_H
+#define BASE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -538,4 +538,4 @@ int bin2c(char *bin_file, char *c_file, char *opt_name)
 }
 #endif
 
-#endif // LIB_H
+#endif // BASE_H
