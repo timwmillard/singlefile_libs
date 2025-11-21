@@ -134,7 +134,7 @@ string string_arena_from(arena *a, const char* str) {
 }
 
 // Ensure capacity for owned strings
-void string_arena__reserve(string* s, arena *a, size_t new_cap) {
+void _string_arena_reserve(string* s, arena *a, size_t new_cap) {
     if (!s->owned) {
         // Convert view to owned string
         char* old_data = s->data;
@@ -160,7 +160,7 @@ void string_append(string* s, const char* str) {
     size_t new_len = s->len + add_len;
     
     if (new_len > s->cap) {
-        string_arena__reserve(s, s->arena, new_len * 2);  // double capacity
+        _string_arena_reserve(s, s->arena, new_len * 2);  // double capacity
     }
     
     strcpy(s->data + s->len, str);
@@ -194,7 +194,7 @@ string string_from(const char* str) {
 // Append character
 void string_push(string* s, char c) {
     if (s->len + 1 > s->cap) {
-        string_arena__reserve(s, s->arena, (s->cap + 1) * 2);
+        _string_arena_reserve(s, s->arena, (s->cap + 1) * 2);
     }
     s->data[s->len++] = c;
     s->data[s->len] = '\0';
