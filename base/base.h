@@ -21,7 +21,7 @@ typedef unsigned char byte;
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
-#define ARENA_REGION_DEFAULT_SIZE 4096
+#define ARENA_REGION_DEFAULT_SIZE_BYTES 4096
 
 typedef struct arena_region {
     struct arena_region *next;
@@ -50,15 +50,15 @@ void *null_malloc(size_t size) {
 }
 #endif
 
-// TODO: instead of accepting specific capacity new_region() should accept the size of the object we want to fit into the region
-// It should be up to new_region() to decide the actual capacity to allocate
-arena_region *_arena_new_region(size_t cap) {
-    size_t size_bytes = sizeof(arena_region) + sizeof(uintptr_t)*cap;
+arena_region *_arena_new_region(size_t size) {
+    size_t capacity = ARENA_REGION_DEFAULT_SIZE_BYTES / sizeof(uintptr_t);
+    if (capacity < size) capacity = size;
+    size_t size_bytes = sizeof(uintptr_t)*capacity;
     arena_region *r = (arena_region*)malloc(size_bytes);
     assert(r);
     r->next = NULL;
     r->len = 0;
-    r->cap = cap;
+    r->cap = capacity - sizeof(arena_region);
     return r;
 }
 
@@ -71,9 +71,7 @@ void *arena_alloc(arena *a, size_t size_bytes) {
 
     if (a->end == NULL) {
         assert(a->start == NULL);
-        size_t capacity = ARENA_REGION_DEFAULT_SIZE;
-        if (capacity < size) capacity = size;
-        a->end = _arena_new_region(capacity);
+        a->end = _arena_new_region(size);
         a->start = a->end;
     }
 
@@ -83,9 +81,7 @@ void *arena_alloc(arena *a, size_t size_bytes) {
 
     if (a->end->len + size > a->end->cap) {
         assert(a->end->next == NULL);
-        size_t capacity = ARENA_REGION_DEFAULT_SIZE;
-        if (capacity < size) capacity = size;
-        a->end->next = _arena_new_region(capacity);
+        a->end->next = _arena_new_region(size);
         a->end = a->end->next;
     }
 
