@@ -51,14 +51,14 @@ void *null_malloc(size_t size) {
 #endif
 
 arena_region *_arena_new_region(size_t size) {
-    size_t capacity = ARENA_REGION_DEFAULT_SIZE_BYTES / sizeof(uintptr_t);
-    if (capacity < size) capacity = size;
-    size_t size_bytes = sizeof(uintptr_t)*capacity;
+    size_t region_cap = ARENA_REGION_DEFAULT_SIZE_BYTES / sizeof(uintptr_t);
+    if (region_cap < size) region_cap = size;
+    size_t size_bytes = sizeof(uintptr_t)*region_cap;
     arena_region *r = (arena_region*)malloc(size_bytes);
     assert(r);
     r->next = NULL;
     r->len = 0;
-    r->cap = capacity - sizeof(arena_region);
+    r->cap = region_cap - sizeof(arena_region) / sizeof(uintptr_t);
     return r;
 }
 
@@ -267,7 +267,7 @@ string string_lower(string s) {
 const char *cstr(string *s) {
     // Make sure we have capacity for the null terminator
     if (s->len > s->cap) {
-        string_arena__reserve(s, s->arena, s->len * 2);  // double capacity
+        _string_arena_reserve(s, s->arena, s->len * 2);  // double capacity
     }
     
     // Add null terminator
