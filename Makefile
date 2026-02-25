@@ -99,6 +99,9 @@ mongoose:
 coroutines:
 	wget -O deps/minicoro.h https://github.com/edubart/minicoro/raw/refs/heads/main/minicoro.h
 
+riely:
+	wget -O deps/silicon.h https://github.com/ColleagueRiley/Silicon-h/raw/refs/heads/main/silicon.h
+
 ## Games ##
 
 cute_tiled:
