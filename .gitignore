@@ -1,0 +1,4 @@
+
+gen/gen_linalg
+gen/linalg_test
+lib_test
