@@ -1,5 +1,5 @@
 /*
- 
+
 linalg.h Linear Alegbra generator.
 
 Usage:
@@ -11,25 +11,26 @@ cc -o gen_linalg gen_linalg.c && ./gen_linalg > linalg.h
 // ─── vector table ────────────────────────────────────────────────────────────
 
 typedef struct {
-    const char *name;   // "vec3f"
-    const char *type;   // "float"
-    const char *tt;     // "f"
-    int         n;      // 3
+    const char *name;      // "vec3f"
+    const char *type;      // "float"
+    const char *tt;        // "f"
+    int         n;         // 3
+    int         is_float;  // 0 for integer types; affects len return type and norm
 } VecDef;
 
 static VecDef vecs[] = {
-    { "vec2",  "uint8_t",  "",  2 },
-    { "vec3",  "uint8_t",  "",  3 },
-    { "vec4",  "uint8_t",  "",  4 },
-    { "vec2i", "int32_t",  "i", 2 },
-    { "vec3i", "int32_t",  "i", 3 },
-    { "vec4i", "int32_t",  "i", 4 },
-    { "vec2u", "uint32_t", "u", 2 },
-    { "vec3u", "uint32_t", "u", 3 },
-    { "vec4u", "uint32_t", "u", 4 },
-    { "vec2f", "float",    "f", 2 },
-    { "vec3f", "float",    "f", 3 },
-    { "vec4f", "float",    "f", 4 },
+    { "vec2",  "uint8_t",  "",  2, 0 },
+    { "vec3",  "uint8_t",  "",  3, 0 },
+    { "vec4",  "uint8_t",  "",  4, 0 },
+    { "vec2i", "int32_t",  "i", 2, 0 },
+    { "vec3i", "int32_t",  "i", 3, 0 },
+    { "vec4i", "int32_t",  "i", 4, 0 },
+    { "vec2u", "uint32_t", "u", 2, 0 },
+    { "vec3u", "uint32_t", "u", 3, 0 },
+    { "vec4u", "uint32_t", "u", 4, 0 },
+    { "vec2f", "float",    "f", 2, 1 },
+    { "vec3f", "float",    "f", 3, 1 },
+    { "vec4f", "float",    "f", 4, 1 },
 };
 
 // ─── field names ─────────────────────────────────────────────────────────────
@@ -99,16 +100,17 @@ static void emit_vec_dot(VecDef *v) {
 }
 
 static void emit_vec_len(VecDef *v) {
-    printf("static inline %s %s_len(%s a) {\n",
-           v->type, v->name, v->name);
-    printf("    %s r = 0;\n", v->type);
+    printf("static inline float %s_len(%s a) {\n", v->name, v->name);
+    printf("    float r = 0;\n");
     printf("    for (int i = 0; i < %d; i++)\n", v->n);
-    printf("        r += a.v[i] * a.v[i];\n");
+    printf("        r += (float)a.v[i] * (float)a.v[i];\n");
     printf("    return sqrtf(r);\n");
     printf("}\n\n");
 }
 
 static void emit_vec_norm(VecDef *v) {
+    // norm requires float arithmetic; skip for integer types
+    if (!v->is_float) return;
     printf("static inline %s %s_norm(%s a) {\n",
            v->name, v->name, v->name);
     printf("    return %s_scale(a, 1.0f / %s_len(a));\n",

@@ -45,15 +45,11 @@ static inline uint8_t vec2_dot(vec2 a, vec2 b) {
     return r;
 }
 
-static inline uint8_t vec2_len(vec2 a) {
-    uint8_t r = 0;
+static inline float vec2_len(vec2 a) {
+    float r = 0;
     for (int i = 0; i < 2; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
-}
-
-static inline vec2 vec2_norm(vec2 a) {
-    return vec2_scale(a, 1.0f / vec2_len(a));
 }
 
 // ── vec3 ──
@@ -97,15 +93,11 @@ static inline uint8_t vec3_dot(vec3 a, vec3 b) {
     return r;
 }
 
-static inline uint8_t vec3_len(vec3 a) {
-    uint8_t r = 0;
+static inline float vec3_len(vec3 a) {
+    float r = 0;
     for (int i = 0; i < 3; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
-}
-
-static inline vec3 vec3_norm(vec3 a) {
-    return vec3_scale(a, 1.0f / vec3_len(a));
 }
 
 static inline vec3 vec3_cross(vec3 a, vec3 b) {
@@ -158,15 +150,11 @@ static inline uint8_t vec4_dot(vec4 a, vec4 b) {
     return r;
 }
 
-static inline uint8_t vec4_len(vec4 a) {
-    uint8_t r = 0;
+static inline float vec4_len(vec4 a) {
+    float r = 0;
     for (int i = 0; i < 4; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
-}
-
-static inline vec4 vec4_norm(vec4 a) {
-    return vec4_scale(a, 1.0f / vec4_len(a));
 }
 
 // ── vec2i ──
@@ -209,15 +197,11 @@ static inline int32_t vec2i_dot(vec2i a, vec2i b) {
     return r;
 }
 
-static inline int32_t vec2i_len(vec2i a) {
-    int32_t r = 0;
+static inline float vec2i_len(vec2i a) {
+    float r = 0;
     for (int i = 0; i < 2; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
-}
-
-static inline vec2i vec2i_norm(vec2i a) {
-    return vec2i_scale(a, 1.0f / vec2i_len(a));
 }
 
 // ── vec3i ──
@@ -261,15 +245,11 @@ static inline int32_t vec3i_dot(vec3i a, vec3i b) {
     return r;
 }
 
-static inline int32_t vec3i_len(vec3i a) {
-    int32_t r = 0;
+static inline float vec3i_len(vec3i a) {
+    float r = 0;
     for (int i = 0; i < 3; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
-}
-
-static inline vec3i vec3i_norm(vec3i a) {
-    return vec3i_scale(a, 1.0f / vec3i_len(a));
 }
 
 static inline vec3i vec3i_cross(vec3i a, vec3i b) {
@@ -322,15 +302,11 @@ static inline int32_t vec4i_dot(vec4i a, vec4i b) {
     return r;
 }
 
-static inline int32_t vec4i_len(vec4i a) {
-    int32_t r = 0;
+static inline float vec4i_len(vec4i a) {
+    float r = 0;
     for (int i = 0; i < 4; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
-}
-
-static inline vec4i vec4i_norm(vec4i a) {
-    return vec4i_scale(a, 1.0f / vec4i_len(a));
 }
 
 // ── vec2u ──
@@ -373,15 +349,11 @@ static inline uint32_t vec2u_dot(vec2u a, vec2u b) {
     return r;
 }
 
-static inline uint32_t vec2u_len(vec2u a) {
-    uint32_t r = 0;
+static inline float vec2u_len(vec2u a) {
+    float r = 0;
     for (int i = 0; i < 2; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
-}
-
-static inline vec2u vec2u_norm(vec2u a) {
-    return vec2u_scale(a, 1.0f / vec2u_len(a));
 }
 
 // ── vec3u ──
@@ -425,15 +397,11 @@ static inline uint32_t vec3u_dot(vec3u a, vec3u b) {
     return r;
 }
 
-static inline uint32_t vec3u_len(vec3u a) {
-    uint32_t r = 0;
+static inline float vec3u_len(vec3u a) {
+    float r = 0;
     for (int i = 0; i < 3; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
-}
-
-static inline vec3u vec3u_norm(vec3u a) {
-    return vec3u_scale(a, 1.0f / vec3u_len(a));
 }
 
 static inline vec3u vec3u_cross(vec3u a, vec3u b) {
@@ -486,15 +454,11 @@ static inline uint32_t vec4u_dot(vec4u a, vec4u b) {
     return r;
 }
 
-static inline uint32_t vec4u_len(vec4u a) {
-    uint32_t r = 0;
+static inline float vec4u_len(vec4u a) {
+    float r = 0;
     for (int i = 0; i < 4; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
-}
-
-static inline vec4u vec4u_norm(vec4u a) {
-    return vec4u_scale(a, 1.0f / vec4u_len(a));
 }
 
 // ── vec2f ──
@@ -540,7 +504,7 @@ static inline float vec2f_dot(vec2f a, vec2f b) {
 static inline float vec2f_len(vec2f a) {
     float r = 0;
     for (int i = 0; i < 2; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
 }
 
@@ -592,7 +556,7 @@ static inline float vec3f_dot(vec3f a, vec3f b) {
 static inline float vec3f_len(vec3f a) {
     float r = 0;
     for (int i = 0; i < 3; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
 }
 
@@ -653,176 +617,12 @@ static inline float vec4f_dot(vec4f a, vec4f b) {
 static inline float vec4f_len(vec4f a) {
     float r = 0;
     for (int i = 0; i < 4; i++)
-        r += a.v[i] * a.v[i];
+        r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
 }
 
 static inline vec4f vec4f_norm(vec4f a) {
     return vec4f_scale(a, 1.0f / vec4f_len(a));
-}
-
-// ── vec2d ──
-
-typedef struct {
-    union {
-        struct {
-            double x;
-            double y;
-        };
-        double v[2];
-    };
-} vec2d;
-
-static inline vec2d vec2d_add(vec2d a, vec2d b) {
-    vec2d r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec2d vec2d_sub(vec2d a, vec2d b) {
-    vec2d r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec2d vec2d_scale(vec2d a, double s) {
-    vec2d r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline double vec2d_dot(vec2d a, vec2d b) {
-    double r = 0;
-    for (int i = 0; i < 2; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline double vec2d_len(vec2d a) {
-    double r = 0;
-    for (int i = 0; i < 2; i++)
-        r += a.v[i] * a.v[i];
-    return sqrtf(r);
-}
-
-static inline vec2d vec2d_norm(vec2d a) {
-    return vec2d_scale(a, 1.0f / vec2d_len(a));
-}
-
-// ── vec3d ──
-
-typedef struct {
-    union {
-        struct {
-            double x;
-            double y;
-            double z;
-        };
-        double v[3];
-    };
-} vec3d;
-
-static inline vec3d vec3d_add(vec3d a, vec3d b) {
-    vec3d r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec3d vec3d_sub(vec3d a, vec3d b) {
-    vec3d r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec3d vec3d_scale(vec3d a, double s) {
-    vec3d r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline double vec3d_dot(vec3d a, vec3d b) {
-    double r = 0;
-    for (int i = 0; i < 3; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline double vec3d_len(vec3d a) {
-    double r = 0;
-    for (int i = 0; i < 3; i++)
-        r += a.v[i] * a.v[i];
-    return sqrtf(r);
-}
-
-static inline vec3d vec3d_norm(vec3d a) {
-    return vec3d_scale(a, 1.0f / vec3d_len(a));
-}
-
-static inline vec3d vec3d_cross(vec3d a, vec3d b) {
-    return (vec3d){
-        a.y*b.z - a.z*b.y,
-        a.z*b.x - a.x*b.z,
-        a.x*b.y - a.y*b.x,
-    };
-}
-
-// ── vec4d ──
-
-typedef struct {
-    union {
-        struct {
-            double x;
-            double y;
-            double z;
-            double w;
-        };
-        double v[4];
-    };
-} vec4d;
-
-static inline vec4d vec4d_add(vec4d a, vec4d b) {
-    vec4d r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec4d vec4d_sub(vec4d a, vec4d b) {
-    vec4d r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec4d vec4d_scale(vec4d a, double s) {
-    vec4d r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline double vec4d_dot(vec4d a, vec4d b) {
-    double r = 0;
-    for (int i = 0; i < 4; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline double vec4d_len(vec4d a) {
-    double r = 0;
-    for (int i = 0; i < 4; i++)
-        r += a.v[i] * a.v[i];
-    return sqrtf(r);
-}
-
-static inline vec4d vec4d_norm(vec4d a) {
-    return vec4d_scale(a, 1.0f / vec4d_len(a));
 }
 
 #endif // LINALG_H
