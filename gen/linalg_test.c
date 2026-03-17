@@ -1,10 +1,7 @@
-#include <assert.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "linalg.h"
-
-#define EPS 1e-5f
-#define ASSERT_FEQ(a, b) assert(fabsf((a) - (b)) < EPS)
 
 #define COLOR_GREEN  "\033[32m"
 #define COLOR_RED    "\033[31m"
@@ -13,6 +10,18 @@
 
 #define PASS(name) printf(COLOR_GREEN "  PASS" COLOR_RESET "  %s\n", name)
 
+static int _failed = 0;
+
+#define ASSERT(expr) do { \
+    if (!(expr)) { \
+        printf(COLOR_RED "  FAIL" COLOR_RESET "  %s:%d  " #expr "\n", __FILE__, __LINE__); \
+        _failed++; \
+    } \
+} while(0)
+
+#define EPS 1e-5f
+#define ASSERT_FEQ(a, b) ASSERT(fabsf((a) - (b)) < EPS)
+
 // ─── vec2 (uint8_t) ───────────────────────────────────────────────────────────
 
 static void test_vec2(void) {
@@ -20,15 +29,15 @@ static void test_vec2(void) {
     vec2 b = {1, 2};
 
     vec2 r = vec2_add(a, b);
-    assert(r.x == 4 && r.y == 6);
+    ASSERT(r.x == 4 && r.y == 6);
 
     r = vec2_sub(a, b);
-    assert(r.x == 2 && r.y == 2);
+    ASSERT(r.x == 2 && r.y == 2);
 
     r = vec2_scale(a, 2);
-    assert(r.x == 6 && r.y == 8);
+    ASSERT(r.x == 6 && r.y == 8);
 
-    assert(vec2_dot(a, b) == 3*1 + 4*2);
+    ASSERT(vec2_dot(a, b) == 3*1 + 4*2);
 
     ASSERT_FEQ(vec2_len(a), 5.0f);
 }
@@ -40,20 +49,20 @@ static void test_vec3(void) {
     vec3 b = {4, 5, 6};
 
     vec3 r = vec3_add(a, b);
-    assert(r.x == 5 && r.y == 7 && r.z == 9);
+    ASSERT(r.x == 5 && r.y == 7 && r.z == 9);
 
     r = vec3_sub(b, a);
-    assert(r.x == 3 && r.y == 3 && r.z == 3);
+    ASSERT(r.x == 3 && r.y == 3 && r.z == 3);
 
     r = vec3_scale(a, 3);
-    assert(r.x == 3 && r.y == 6 && r.z == 9);
+    ASSERT(r.x == 3 && r.y == 6 && r.z == 9);
 
-    assert(vec3_dot(a, b) == 1*4 + 2*5 + 3*6);
+    ASSERT(vec3_dot(a, b) == 1*4 + 2*5 + 3*6);
 
     ASSERT_FEQ(vec3_len((vec3){0, 3, 4}), 5.0f);
 
     vec3 cx = vec3_cross((vec3){1,0,0}, (vec3){0,1,0});
-    assert(cx.x == 0 && cx.y == 0 && cx.z == 1);
+    ASSERT(cx.x == 0 && cx.y == 0 && cx.z == 1);
 }
 
 // ─── vec4 (uint8_t) ───────────────────────────────────────────────────────────
@@ -63,15 +72,15 @@ static void test_vec4(void) {
     vec4 b = {5, 6, 7, 8};
 
     vec4 r = vec4_add(a, b);
-    assert(r.x == 6 && r.y == 8 && r.z == 10 && r.w == 12);
+    ASSERT(r.x == 6 && r.y == 8 && r.z == 10 && r.w == 12);
 
     r = vec4_sub(b, a);
-    assert(r.x == 4 && r.y == 4 && r.z == 4 && r.w == 4);
+    ASSERT(r.x == 4 && r.y == 4 && r.z == 4 && r.w == 4);
 
     r = vec4_scale(a, 2);
-    assert(r.x == 2 && r.y == 4 && r.z == 6 && r.w == 8);
+    ASSERT(r.x == 2 && r.y == 4 && r.z == 6 && r.w == 8);
 
-    assert(vec4_dot(a, b) == 1*5 + 2*6 + 3*7 + 4*8);
+    ASSERT(vec4_dot(a, b) == 1*5 + 2*6 + 3*7 + 4*8);
 
     ASSERT_FEQ(vec4_len((vec4){0, 0, 3, 4}), 5.0f);
 }
@@ -83,15 +92,15 @@ static void test_vec2i(void) {
     vec2i b = {1, -2};
 
     vec2i r = vec2i_add(a, b);
-    assert(r.x == -2 && r.y == 2);
+    ASSERT(r.x == -2 && r.y == 2);
 
     r = vec2i_sub(a, b);
-    assert(r.x == -4 && r.y == 6);
+    ASSERT(r.x == -4 && r.y == 6);
 
     r = vec2i_scale(a, -1);
-    assert(r.x == 3 && r.y == -4);
+    ASSERT(r.x == 3 && r.y == -4);
 
-    assert(vec2i_dot(a, b) == (-3)*1 + 4*(-2));
+    ASSERT(vec2i_dot(a, b) == (-3)*1 + 4*(-2));
 
     ASSERT_FEQ(vec2i_len((vec2i){3, 4}), 5.0f);
 }
@@ -103,20 +112,20 @@ static void test_vec3i(void) {
     vec3i b = {4, 5, -6};
 
     vec3i r = vec3i_add(a, b);
-    assert(r.x == 5 && r.y == 3 && r.z == -3);
+    ASSERT(r.x == 5 && r.y == 3 && r.z == -3);
 
     r = vec3i_sub(a, b);
-    assert(r.x == -3 && r.y == -7 && r.z == 9);
+    ASSERT(r.x == -3 && r.y == -7 && r.z == 9);
 
     r = vec3i_scale(a, 2);
-    assert(r.x == 2 && r.y == -4 && r.z == 6);
+    ASSERT(r.x == 2 && r.y == -4 && r.z == 6);
 
-    assert(vec3i_dot(a, b) == 1*4 + (-2)*5 + 3*(-6));
+    ASSERT(vec3i_dot(a, b) == 1*4 + (-2)*5 + 3*(-6));
 
     ASSERT_FEQ(vec3i_len((vec3i){0, 3, 4}), 5.0f);
 
     vec3i cx = vec3i_cross((vec3i){1,0,0}, (vec3i){0,1,0});
-    assert(cx.x == 0 && cx.y == 0 && cx.z == 1);
+    ASSERT(cx.x == 0 && cx.y == 0 && cx.z == 1);
 }
 
 // ─── vec4i (int32_t) ──────────────────────────────────────────────────────────
@@ -126,15 +135,15 @@ static void test_vec4i(void) {
     vec4i b = {-1, 2, -3, 4};
 
     vec4i r = vec4i_add(a, b);
-    assert(r.x == 0 && r.y == 0 && r.z == 0 && r.w == 0);
+    ASSERT(r.x == 0 && r.y == 0 && r.z == 0 && r.w == 0);
 
     r = vec4i_sub(a, b);
-    assert(r.x == 2 && r.y == -4 && r.z == 6 && r.w == -8);
+    ASSERT(r.x == 2 && r.y == -4 && r.z == 6 && r.w == -8);
 
     r = vec4i_scale(a, 3);
-    assert(r.x == 3 && r.y == -6 && r.z == 9 && r.w == -12);
+    ASSERT(r.x == 3 && r.y == -6 && r.z == 9 && r.w == -12);
 
-    assert(vec4i_dot(a, b) == 1*(-1) + (-2)*2 + 3*(-3) + (-4)*4);
+    ASSERT(vec4i_dot(a, b) == 1*(-1) + (-2)*2 + 3*(-3) + (-4)*4);
 
     ASSERT_FEQ(vec4i_len((vec4i){0, 0, 3, 4}), 5.0f);
 }
@@ -146,15 +155,15 @@ static void test_vec2u(void) {
     vec2u b = {1, 2};
 
     vec2u r = vec2u_add(a, b);
-    assert(r.x == 4 && r.y == 6);
+    ASSERT(r.x == 4 && r.y == 6);
 
     r = vec2u_sub(a, b);
-    assert(r.x == 2 && r.y == 2);
+    ASSERT(r.x == 2 && r.y == 2);
 
     r = vec2u_scale(a, 3);
-    assert(r.x == 9 && r.y == 12);
+    ASSERT(r.x == 9 && r.y == 12);
 
-    assert(vec2u_dot(a, b) == 3*1 + 4*2);
+    ASSERT(vec2u_dot(a, b) == 3*1 + 4*2);
 
     ASSERT_FEQ(vec2u_len(a), 5.0f);
 }
@@ -166,20 +175,20 @@ static void test_vec3u(void) {
     vec3u b = {4, 5, 6};
 
     vec3u r = vec3u_add(a, b);
-    assert(r.x == 5 && r.y == 7 && r.z == 9);
+    ASSERT(r.x == 5 && r.y == 7 && r.z == 9);
 
     r = vec3u_sub(b, a);
-    assert(r.x == 3 && r.y == 3 && r.z == 3);
+    ASSERT(r.x == 3 && r.y == 3 && r.z == 3);
 
     r = vec3u_scale(a, 4);
-    assert(r.x == 4 && r.y == 8 && r.z == 12);
+    ASSERT(r.x == 4 && r.y == 8 && r.z == 12);
 
-    assert(vec3u_dot(a, b) == 1*4 + 2*5 + 3*6);
+    ASSERT(vec3u_dot(a, b) == 1*4 + 2*5 + 3*6);
 
     ASSERT_FEQ(vec3u_len((vec3u){0, 3, 4}), 5.0f);
 
     vec3u cx = vec3u_cross((vec3u){1,0,0}, (vec3u){0,1,0});
-    assert(cx.x == 0 && cx.y == 0 && cx.z == 1);
+    ASSERT(cx.x == 0 && cx.y == 0 && cx.z == 1);
 }
 
 // ─── vec4u (uint32_t) ─────────────────────────────────────────────────────────
@@ -189,15 +198,15 @@ static void test_vec4u(void) {
     vec4u b = {5, 6, 7, 8};
 
     vec4u r = vec4u_add(a, b);
-    assert(r.x == 6 && r.y == 8 && r.z == 10 && r.w == 12);
+    ASSERT(r.x == 6 && r.y == 8 && r.z == 10 && r.w == 12);
 
     r = vec4u_sub(b, a);
-    assert(r.x == 4 && r.y == 4 && r.z == 4 && r.w == 4);
+    ASSERT(r.x == 4 && r.y == 4 && r.z == 4 && r.w == 4);
 
     r = vec4u_scale(a, 2);
-    assert(r.x == 2 && r.y == 4 && r.z == 6 && r.w == 8);
+    ASSERT(r.x == 2 && r.y == 4 && r.z == 6 && r.w == 8);
 
-    assert(vec4u_dot(a, b) == 1*5 + 2*6 + 3*7 + 4*8);
+    ASSERT(vec4u_dot(a, b) == 1*5 + 2*6 + 3*7 + 4*8);
 
     ASSERT_FEQ(vec4u_len((vec4u){0, 0, 3, 4}), 5.0f);
 }
@@ -420,7 +429,7 @@ static void test_mat4f(void) {
 // ─── main ─────────────────────────────────────────────────────────────────────
 
 int main(void) {
-    printf(COLOR_BOLD "\nlinalg tests\n" COLOR_RESET "\n");
+    printf(COLOR_BOLD "\nlinalg.h tests\n" COLOR_RESET "\n");
 
     test_vec2();  PASS("vec2");
     test_vec3();  PASS("vec3");
@@ -438,6 +447,9 @@ int main(void) {
     test_mat3f(); PASS("mat3f");
     test_mat4f(); PASS("mat4f");
 
-    printf("\nAll tests passed.\n\n");
-    return 0;
+    if (_failed == 0)
+        printf("\n" COLOR_BOLD COLOR_GREEN "All tests passed." COLOR_RESET "\n\n");
+    else
+        printf("\n" COLOR_BOLD COLOR_RED "%d test(s) failed." COLOR_RESET "\n\n", _failed);
+    return _failed != 0;
 }
