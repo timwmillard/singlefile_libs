@@ -13,24 +13,23 @@ cc -o gen_linalg gen_linalg.c && ./gen_linalg > linalg.h
 typedef struct {
     const char *name;      // "vec3f"
     const char *type;      // "float"
-    const char *tt;        // "f"
     int         n;         // 3
     int         is_float;  // 0 for integer types; affects len return type and norm
 } VecDef;
 
 static VecDef vecs[] = {
-    { "vec2",  "uint8_t",  "",  2, 0 },
-    { "vec3",  "uint8_t",  "",  3, 0 },
-    { "vec4",  "uint8_t",  "",  4, 0 },
-    { "vec2i", "int32_t",  "i", 2, 0 },
-    { "vec3i", "int32_t",  "i", 3, 0 },
-    { "vec4i", "int32_t",  "i", 4, 0 },
-    { "vec2u", "uint32_t", "u", 2, 0 },
-    { "vec3u", "uint32_t", "u", 3, 0 },
-    { "vec4u", "uint32_t", "u", 4, 0 },
-    { "vec2f", "float",    "f", 2, 1 },
-    { "vec3f", "float",    "f", 3, 1 },
-    { "vec4f", "float",    "f", 4, 1 },
+    { "vec2",  "uint8_t",  2, 0 },
+    { "vec3",  "uint8_t",  3, 0 },
+    { "vec4",  "uint8_t",  4, 0 },
+    { "vec2i", "int32_t",  2, 0 },
+    { "vec3i", "int32_t",  3, 0 },
+    { "vec4i", "int32_t",  4, 0 },
+    { "vec2u", "uint32_t", 2, 0 },
+    { "vec3u", "uint32_t", 3, 0 },
+    { "vec4u", "uint32_t", 4, 0 },
+    { "vec2f", "float",    2, 1 },
+    { "vec3f", "float",    3, 1 },
+    { "vec4f", "float",    4, 1 },
 };
 
 // ─── matrix table ────────────────────────────────────────────────────────────
