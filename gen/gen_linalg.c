@@ -33,6 +33,20 @@ static VecDef vecs[] = {
     { "vec4f", "float",    "f", 4, 1 },
 };
 
+// ─── matrix table ────────────────────────────────────────────────────────────
+
+typedef struct {
+    const char *name;      // "mat3f"
+    const char *vec_name;  // "vec3f"
+    int         n;         // 3
+} MatDef;
+
+static MatDef mats[] = {
+    { "mat2f", "vec2f", 2 },
+    { "mat3f", "vec3f", 3 },
+    { "mat4f", "vec4f", 4 },
+};
+
 // ─── field names ─────────────────────────────────────────────────────────────
 
 static const char *fields[] = { "x", "y", "z", "w" };
@@ -46,7 +60,7 @@ static void emit_vec_fields(VecDef *v) {
         printf("            %s %s;\n", v->type, fields[i]);
 }
 
-// ─── emitters ────────────────────────────────────────────────────────────────
+// ─── vec emitters ─────────────────────────────────────────────────────────────
 
 static void emit_vec_struct(VecDef *v) {
     printf("typedef struct {\n");
@@ -131,6 +145,90 @@ static void emit_vec_cross(VecDef *v) {
     printf("}\n\n");
 }
 
+// ─── mat emitters ─────────────────────────────────────────────────────────────
+
+static void emit_mat_struct(MatDef *m) {
+    printf("typedef struct {\n");
+    printf("    union {\n");
+    printf("        float m[%d][%d];\n", m->n, m->n);
+    printf("        float v[%d];\n", m->n * m->n);
+    printf("    };\n");
+    printf("} %s;\n\n", m->name);
+}
+
+static void emit_mat_identity(MatDef *m) {
+    printf("static inline %s %s_identity(void) {\n", m->name, m->name);
+    printf("    %s r = {0};\n", m->name);
+    printf("    for (int i = 0; i < %d; i++)\n", m->n);
+    printf("        r.m[i][i] = 1.0f;\n");
+    printf("    return r;\n");
+    printf("}\n\n");
+}
+
+static void emit_mat_add(MatDef *m) {
+    printf("static inline %s %s_add(%s a, %s b) {\n",
+           m->name, m->name, m->name, m->name);
+    printf("    %s r;\n", m->name);
+    printf("    for (int i = 0; i < %d; i++)\n", m->n * m->n);
+    printf("        r.v[i] = a.v[i] + b.v[i];\n");
+    printf("    return r;\n");
+    printf("}\n\n");
+}
+
+static void emit_mat_sub(MatDef *m) {
+    printf("static inline %s %s_sub(%s a, %s b) {\n",
+           m->name, m->name, m->name, m->name);
+    printf("    %s r;\n", m->name);
+    printf("    for (int i = 0; i < %d; i++)\n", m->n * m->n);
+    printf("        r.v[i] = a.v[i] - b.v[i];\n");
+    printf("    return r;\n");
+    printf("}\n\n");
+}
+
+static void emit_mat_scale(MatDef *m) {
+    printf("static inline %s %s_scale(%s a, float s) {\n",
+           m->name, m->name, m->name);
+    printf("    %s r;\n", m->name);
+    printf("    for (int i = 0; i < %d; i++)\n", m->n * m->n);
+    printf("        r.v[i] = a.v[i] * s;\n");
+    printf("    return r;\n");
+    printf("}\n\n");
+}
+
+static void emit_mat_mul(MatDef *m) {
+    printf("static inline %s %s_mul(%s a, %s b) {\n",
+           m->name, m->name, m->name, m->name);
+    printf("    %s r = {0};\n", m->name);
+    printf("    for (int i = 0; i < %d; i++)\n", m->n);
+    printf("        for (int j = 0; j < %d; j++)\n", m->n);
+    printf("            for (int k = 0; k < %d; k++)\n", m->n);
+    printf("                r.m[i][j] += a.m[i][k] * b.m[k][j];\n");
+    printf("    return r;\n");
+    printf("}\n\n");
+}
+
+static void emit_mat_transpose(MatDef *m) {
+    printf("static inline %s %s_transpose(%s a) {\n",
+           m->name, m->name, m->name);
+    printf("    %s r;\n", m->name);
+    printf("    for (int i = 0; i < %d; i++)\n", m->n);
+    printf("        for (int j = 0; j < %d; j++)\n", m->n);
+    printf("            r.m[i][j] = a.m[j][i];\n");
+    printf("    return r;\n");
+    printf("}\n\n");
+}
+
+static void emit_mat_mul_vec(MatDef *m) {
+    printf("static inline %s %s_mul_vec(%s a, %s b) {\n",
+           m->vec_name, m->name, m->name, m->vec_name);
+    printf("    %s r = {0};\n", m->vec_name);
+    printf("    for (int i = 0; i < %d; i++)\n", m->n);
+    printf("        for (int j = 0; j < %d; j++)\n", m->n);
+    printf("            r.v[i] += a.m[i][j] * b.v[j];\n");
+    printf("    return r;\n");
+    printf("}\n\n");
+}
+
 // ─── main ────────────────────────────────────────────────────────────────────
 
 int main(void) {
@@ -140,8 +238,8 @@ int main(void) {
     printf("#include <stddef.h>\n");
     printf("#include <stdint.h>\n\n");
 
-    int count = ARRAY_COUNT(vecs);
-    for (int i = 0; i < count; i++) {
+    int vec_count = ARRAY_COUNT(vecs);
+    for (int i = 0; i < vec_count; i++) {
         VecDef *v = &vecs[i];
         printf("// ── %s ──\n\n", v->name);
         emit_vec_struct(v);
@@ -152,6 +250,20 @@ int main(void) {
         emit_vec_len(v);
         emit_vec_norm(v);
         emit_vec_cross(v);
+    }
+
+    int mat_count = ARRAY_COUNT(mats);
+    for (int i = 0; i < mat_count; i++) {
+        MatDef *m = &mats[i];
+        printf("// ── %s ──\n\n", m->name);
+        emit_mat_struct(m);
+        emit_mat_identity(m);
+        emit_mat_add(m);
+        emit_mat_sub(m);
+        emit_mat_scale(m);
+        emit_mat_mul(m);
+        emit_mat_transpose(m);
+        emit_mat_mul_vec(m);
     }
 
     printf("#endif // LINALG_H\n");

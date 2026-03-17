@@ -625,4 +625,190 @@ static inline vec4f vec4f_norm(vec4f a) {
     return vec4f_scale(a, 1.0f / vec4f_len(a));
 }
 
+// ── mat2f ──
+
+typedef struct {
+    union {
+        float m[2][2];
+        float v[4];
+    };
+} mat2f;
+
+static inline mat2f mat2f_identity(void) {
+    mat2f r = {0};
+    for (int i = 0; i < 2; i++)
+        r.m[i][i] = 1.0f;
+    return r;
+}
+
+static inline mat2f mat2f_add(mat2f a, mat2f b) {
+    mat2f r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline mat2f mat2f_sub(mat2f a, mat2f b) {
+    mat2f r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline mat2f mat2f_scale(mat2f a, float s) {
+    mat2f r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline mat2f mat2f_mul(mat2f a, mat2f b) {
+    mat2f r = {0};
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++)
+            for (int k = 0; k < 2; k++)
+                r.m[i][j] += a.m[i][k] * b.m[k][j];
+    return r;
+}
+
+static inline mat2f mat2f_transpose(mat2f a) {
+    mat2f r;
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++)
+            r.m[i][j] = a.m[j][i];
+    return r;
+}
+
+static inline vec2f mat2f_mul_vec(mat2f a, vec2f b) {
+    vec2f r = {0};
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++)
+            r.v[i] += a.m[i][j] * b.v[j];
+    return r;
+}
+
+// ── mat3f ──
+
+typedef struct {
+    union {
+        float m[3][3];
+        float v[9];
+    };
+} mat3f;
+
+static inline mat3f mat3f_identity(void) {
+    mat3f r = {0};
+    for (int i = 0; i < 3; i++)
+        r.m[i][i] = 1.0f;
+    return r;
+}
+
+static inline mat3f mat3f_add(mat3f a, mat3f b) {
+    mat3f r;
+    for (int i = 0; i < 9; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline mat3f mat3f_sub(mat3f a, mat3f b) {
+    mat3f r;
+    for (int i = 0; i < 9; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline mat3f mat3f_scale(mat3f a, float s) {
+    mat3f r;
+    for (int i = 0; i < 9; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline mat3f mat3f_mul(mat3f a, mat3f b) {
+    mat3f r = {0};
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            for (int k = 0; k < 3; k++)
+                r.m[i][j] += a.m[i][k] * b.m[k][j];
+    return r;
+}
+
+static inline mat3f mat3f_transpose(mat3f a) {
+    mat3f r;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            r.m[i][j] = a.m[j][i];
+    return r;
+}
+
+static inline vec3f mat3f_mul_vec(mat3f a, vec3f b) {
+    vec3f r = {0};
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            r.v[i] += a.m[i][j] * b.v[j];
+    return r;
+}
+
+// ── mat4f ──
+
+typedef struct {
+    union {
+        float m[4][4];
+        float v[16];
+    };
+} mat4f;
+
+static inline mat4f mat4f_identity(void) {
+    mat4f r = {0};
+    for (int i = 0; i < 4; i++)
+        r.m[i][i] = 1.0f;
+    return r;
+}
+
+static inline mat4f mat4f_add(mat4f a, mat4f b) {
+    mat4f r;
+    for (int i = 0; i < 16; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline mat4f mat4f_sub(mat4f a, mat4f b) {
+    mat4f r;
+    for (int i = 0; i < 16; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline mat4f mat4f_scale(mat4f a, float s) {
+    mat4f r;
+    for (int i = 0; i < 16; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline mat4f mat4f_mul(mat4f a, mat4f b) {
+    mat4f r = {0};
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            for (int k = 0; k < 4; k++)
+                r.m[i][j] += a.m[i][k] * b.m[k][j];
+    return r;
+}
+
+static inline mat4f mat4f_transpose(mat4f a) {
+    mat4f r;
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            r.m[i][j] = a.m[j][i];
+    return r;
+}
+
+static inline vec4f mat4f_mul_vec(mat4f a, vec4f b) {
+    vec4f r = {0};
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            r.v[i] += a.m[i][j] * b.v[j];
+    return r;
+}
+
 #endif // LINALG_H
