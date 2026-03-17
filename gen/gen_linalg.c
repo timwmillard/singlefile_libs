@@ -237,6 +237,15 @@ int main(void) {
     printf("#include <math.h>\n");
     printf("#include <stddef.h>\n");
     printf("#include <stdint.h>\n\n");
+    printf("#if defined(__GNUC__) || defined(__clang__)\n");
+    printf("#  pragma GCC diagnostic ignored \"-Wfloat-equal\"\n");
+    printf("#  pragma GCC diagnostic ignored \"-Wmissing-braces\"\n");
+    printf("#  pragma GCC diagnostic ignored \"-Wmissing-field-initializers\"\n");
+    printf("#  ifdef __clang__\n");
+    printf("#    pragma GCC diagnostic ignored \"-Wgnu-anonymous-struct\"\n");
+    printf("#    pragma GCC diagnostic ignored \"-Wnested-anon-types\"\n");
+    printf("#  endif\n");
+    printf("#endif\n\n");
 
     int vec_count = ARRAY_COUNT(vecs);
     for (int i = 0; i < vec_count; i++) {

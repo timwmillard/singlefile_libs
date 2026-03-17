@@ -5,6 +5,16 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if defined(__GNUC__) || defined(__clang__)
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
+#  pragma GCC diagnostic ignored "-Wmissing-braces"
+#  pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#  ifdef __clang__
+#    pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+#    pragma GCC diagnostic ignored "-Wnested-anon-types"
+#  endif
+#endif
+
 // ── vec2 ──
 
 typedef struct {
