@@ -17,7 +17,52 @@ extern "C" {
 #include <unistd.h>
 #include <assert.h>
 
+#if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
+#    define THREAD_LOCAL __thread
+#elif defined(COMPILER_MSVC)
+#    define THREAD_LOCAL __declspec(thread)
+#elif (__STDC_VERSION__ >= 201112L)
+#    define THREAD_LOCAL _Thread_local
+#else
+#    error "Invalid compiler/version for thead variable; Use Clang, GCC, or MSVC, or use C11 or greater"
+#endif
+
 typedef unsigned char byte;
+
+/* standard types */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+// unsigned integer type with width of exactly 8, 16, 32 and 64 bits respectively.
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+typedef __uint128_t uint128;
+
+// signed integer type with width of exactly 8, 16, 32 and 64 bits respectively.
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+typedef __int128_t int128;
+typedef unsigned int uint;
+
+// size is commonly used for array indexing and loop counting.
+typedef size_t usize;
+
+// integer type capable of holding a pointer.
+typedef uintptr_t uptr;
+typedef intptr_t iptr;
+typedef ptrdiff_t ptrdiff;
+
+// floating point
+typedef float float32;
+typedef double float64;
+typedef long double float128;
+
+/* end standard types */
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
@@ -42,6 +87,11 @@ typedef struct {
     bool owned;  // whether we own the memory
     arena *arena;
 } string;
+
+typedef struct {
+    char* data;
+    size_t len;
+} stringview;
 
 
 #if DEBUG
