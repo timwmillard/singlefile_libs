@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
+// #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -34,14 +34,14 @@ typedef unsigned char byte;
 #include <stddef.h>
 #include <stdbool.h>
 
-// unsigned integer type with width of exactly 8, 16, 32 and 64 bits respectively.
+// unsigned integer type with width of exactly 8, 16, 32, 64 & 128 bits respectively.
 typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 typedef __uint128_t uint128;
 
-// signed integer type with width of exactly 8, 16, 32 and 64 bits respectively.
+// signed integer type with width of exactly 8, 16, 32, 64 & 128 bits respectively.
 typedef int8_t int8;
 typedef int16_t int16;
 typedef int32_t int32;
@@ -68,11 +68,12 @@ typedef long double float128;
 
 #define ARENA_REGION_DEFAULT_SIZE_BYTES 4096
 
+
 typedef struct arena_region {
     struct arena_region *next;
-    size_t len;
-    size_t cap;
-    uintptr_t data[];
+    usize len;
+    usize cap;
+    uptr data[];
 } arena_region;
 
 typedef struct arena {
@@ -80,35 +81,46 @@ typedef struct arena {
     arena_region *end;
 } arena;
 
+void *arena_alloc(arena *a, usize size_bytes);
+void *arena_realloc(arena *a, void *oldptr, usize oldsz, usize newsz);
+void arena_reset(arena *a);
+void arena_release(arena *a);
+
+
 typedef struct {
     char* data;
-    size_t len;
-    size_t cap;
-    bool owned;  // whether we own the memory
+    usize len;
+    usize cap;
     arena *arena;
 } string;
 
-typedef struct {
-    char* data;
-    size_t len;
-} stringview;
+string string_new(arena *a, usize capacity);
+string string_from(arena *a, const char* str);
+void string_append(string* s, const char* str);
+string string_view(const char* str);
+string cstringl(arena *a, const char* str, int len);
+string cstring(arena *a, const char* str);
+void string_push(string* s, char c);
+string string_slice(string s, int start, int end);
+bool string_starts_with(string s, const char* prefix);
+bool string_ends_with(string s, const char* suffix);
+int string_find(string s, const char* needle);
+string string_trim(string s);
+string string_upper(string s);
+string string_lower(string s);
+const char *cstr(string *s);
 
+#ifdef BASE_IMPL
 
-#if DEBUG
-void *null_malloc(size_t size) {
-    return NULL;
-}
-#endif
-
-arena_region *_arena_new_region(size_t size) {
-    size_t region_cap = ARENA_REGION_DEFAULT_SIZE_BYTES / sizeof(uintptr_t);
+arena_region *_arena_new_region(usize size) {
+    usize region_cap = ARENA_REGION_DEFAULT_SIZE_BYTES / sizeof(uintptr_t);
     if (region_cap < size) region_cap = size;
-    size_t size_bytes = sizeof(uintptr_t)*region_cap;
+    usize size_bytes = sizeof(uptr)*region_cap;
     arena_region *r = (arena_region*)malloc(size_bytes);
     assert(r);
     r->next = NULL;
     r->len = 0;
-    r->cap = region_cap - sizeof(arena_region) / sizeof(uintptr_t);
+    r->cap = region_cap - sizeof(arena_region) / sizeof(uptr);
     return r;
 }
 
@@ -116,8 +128,8 @@ void _arena_free_region(arena_region *r) {
     free(r);
 }
 
-void *arena_alloc(arena *a, size_t size_bytes) {
-    size_t size = (size_bytes + sizeof(uintptr_t) - 1)/sizeof(uintptr_t);
+void *arena_alloc(arena *a, usize size_bytes) {
+    usize size = (size_bytes + sizeof(uptr) - 1)/sizeof(uptr);
 
     if (a->end == NULL) {
         assert(a->start == NULL);
@@ -140,15 +152,21 @@ void *arena_alloc(arena *a, size_t size_bytes) {
     return result;
 }
 
-void *arena_realloc(arena *a, void *oldptr, size_t oldsz, size_t newsz) {
+void *arena_realloc(arena *a, void *oldptr, usize oldsz, usize newsz) {
     if (newsz <= oldsz) return oldptr;
     void *newptr = arena_alloc(a, newsz);
     char *newptr_char = (char*)newptr;
     char *oldptr_char = (char*)oldptr;
-    for (size_t i = 0; i < oldsz; ++i) {
+    for (usize i = 0; i < oldsz; ++i) {
         newptr_char[i] = oldptr_char[i];
     }
     return newptr;
+}
+
+void arena_reset(arena *a) {
+    for (arena_region *r = a->start; r != NULL; r = r->next)
+        r->len = 0;
+    a->end = a->start;
 }
 
 void arena_release(arena *a) {
@@ -162,37 +180,29 @@ void arena_release(arena *a) {
     a->end = NULL;
 }
 
-string string_arena_new(arena *a, size_t capacity) {
+string string_new(arena *a, usize capacity) {
     char* data = arena_alloc(a, capacity + 1);
     data[0] = '\0';
     return (string){
         .data = data,
         .len = 0,
         .cap = capacity,
-        .owned = true,
         .arena = a,
     };
 }
 
 // Create owned string from C string
-string string_arena_from(arena *a, const char* str) {
-    size_t len = strlen(str);
-    string s = string_arena_new(a, len);
+string string_from(arena *a, const char* str) {
+    usize len = strlen(str);
+    string s = string_new(a, len);
     strcpy(s.data, str);
     s.len = len;
     return s;
 }
 
 // Ensure capacity for owned strings
-void _string_arena_reserve(string* s, arena *a, size_t new_cap) {
-    if (!s->owned) {
-        // Convert view to owned string
-        char* old_data = s->data;
-        s->data = arena_alloc(a, new_cap + 1);
-        strcpy(s->data, old_data);
-        s->owned = true;
-        s->cap = new_cap;
-    } else if (new_cap > s->cap) {
+void _string_reserve(string* s, arena *a, usize new_cap) {
+   if (new_cap > s->cap) {
         if (s->arena) {
             // Arena-allocated string: use arena_realloc
             s->data = arena_realloc(s->arena, s->data, s->cap + 1, new_cap + 1);
@@ -201,16 +211,16 @@ void _string_arena_reserve(string* s, arena *a, size_t new_cap) {
             s->data = realloc(s->data, new_cap + 1);
         }
         s->cap = new_cap;
-    }
+   }
 }
 
 // Append to string
 void string_append(string* s, const char* str) {
-    size_t add_len = strlen(str);
-    size_t new_len = s->len + add_len;
+    usize add_len = strlen(str);
+    usize new_len = s->len + add_len;
     
     if (new_len > s->cap) {
-        _string_arena_reserve(s, s->arena, new_len * 2);  // double capacity
+        _string_reserve(s, s->arena, new_len * 2);  // double capacity
     }
     
     strcpy(s->data + s->len, str);
@@ -222,29 +232,27 @@ string string_view(const char* str) {
     return (string){
         .data = (char*)str,
         .len = strlen(str),
-        .cap = 0,
-        .owned = false
     };
 }
 
-// Create owned string with capacity
-string string_new(size_t capacity) {
-    return string_arena_new(NULL, capacity);
-}
-
-// Create owned string from C string
-string string_from(const char* str) {
-    size_t len = strlen(str);
-    string s = string_new(len);
+// Create owned string from C string with len
+string cstringl(arena *a, const char* str, int len) {
+    string s = string_new(a, len);
     strcpy(s.data, str);
     s.len = len;
     return s;
 }
 
+// Create owned string from C string
+string cstring(arena *a, const char* str) {
+    usize len = strlen(str);
+    return cstringl(a, str, len);
+}
+
 // Append character
 void string_push(string* s, char c) {
     if (s->len + 1 > s->cap) {
-        _string_arena_reserve(s, s->arena, (s->cap + 1) * 2);
+        _string_reserve(s, s->arena, (s->cap + 1) * 2);
     }
     s->data[s->len++] = c;
     s->data[s->len] = '\0';
@@ -256,23 +264,21 @@ string string_slice(string s, int start, int end) {
     if (end < 0) end = s.len + end;
     if (start < 0) start = 0;
     if (end > (int)s.len) end = s.len;
-    if (start >= end) return string_view("");
+    if (start >= end) return cstring(s.arena, "");
     
     return (string){
         .data = s.data + start,
         .len = end - start,
-        .cap = 0,
-        .owned = false
     };
 }
 
 bool string_starts_with(string s, const char* prefix) {
-    size_t prefix_len = strlen(prefix);
+    usize prefix_len = strlen(prefix);
     return s.len >= prefix_len && strncmp(s.data, prefix, prefix_len) == 0;
 }
 
 bool string_ends_with(string s, const char* suffix) {
-    size_t suffix_len = strlen(suffix);
+    usize suffix_len = strlen(suffix);
     return s.len >= suffix_len && 
            strcmp(s.data + s.len - suffix_len, suffix) == 0;
 }
@@ -293,21 +299,20 @@ string string_trim(string s) {
         .data = start,
         .len = end - start + 1,
         .cap = 0,
-        .owned = false
     };
 }
 
 string string_upper(string s) {
-    string result = string_from(s.data);
-    for (size_t i = 0; i < result.len; i++) {
+    string result = string_from(s.arena, s.data);
+    for (usize i = 0; i < result.len; i++) {
         result.data[i] = toupper(result.data[i]);
     }
     return result;
 }
 
 string string_lower(string s) {
-    string result = string_from(s.data);
-    for (size_t i = 0; i < result.len; i++) {
+    string result = string_from(s.arena, s.data);
+    for (usize i = 0; i < result.len; i++) {
         result.data[i] = tolower(result.data[i]);
     }
     return result;
@@ -317,7 +322,7 @@ string string_lower(string s) {
 const char *cstr(string *s) {
     // Make sure we have capacity for the null terminator
     if (s->len > s->cap) {
-        _string_arena_reserve(s, s->arena, s->len * 2);  // double capacity
+        _string_reserve(s, s->arena, s->len * 2);  // double capacity
     }
     
     // Add null terminator
@@ -326,20 +331,12 @@ const char *cstr(string *s) {
     return s->data;
 }
 
-// Free owned string
-void string_free(string* s) {
-    if (s->owned && !s->arena && s->data) {
-        free(s->data);
-        s->data = NULL;
-        s->owned = false;
-    }
-}
-
 
 // Split string into array
 typedef struct {
     string* items;
-    size_t count;
+    usize count;
+    arena *arena;
 } string_array;
 
 #define string_array_arena_from(a, array) string_array_arena_from_count(a, array, ARRAY_SIZE(array))
@@ -347,7 +344,7 @@ string_array string_array_arena_from_count(arena *a, const char* array[], int co
     string_array sa;
     sa.items = arena_alloc(a, sizeof(*sa.items) * count);
     for (int i = 0; i < count; i++) {
-        sa.items[i] = string_from(array[i]);
+        sa.items[i] = string_from(a, array[i]);
     }
     sa.count = count;
     return sa;
@@ -374,7 +371,7 @@ string_array string_array_view(char* array, int count) {
 
 string_array string_split(string s, const char* delimiter) {
     // Count occurrences
-    size_t count = 1;
+    usize count = 1;
     char *tmp = s.data;
     while ((tmp = strstr(tmp, delimiter)) != NULL) {
         count++;
@@ -382,7 +379,7 @@ string_array string_split(string s, const char* delimiter) {
     }
     
     string *items = malloc(sizeof(string) * count);
-    size_t idx = 0;
+    usize idx = 0;
     
     char *start = s.data;
     char *end;
@@ -392,7 +389,6 @@ string_array string_split(string s, const char* delimiter) {
             .data = start,
             .len = end - start,
             .cap = 0,
-            .owned = false
         };
         start = end + strlen(delimiter);
     }
@@ -409,17 +405,17 @@ void string_array_free(string_array* arr) {
 
 // Join strings
 string string_join(string_array arr, const char* separator) {
-    size_t total_len = 0;
-    size_t sep_len = strlen(separator);
+    usize total_len = 0;
+    usize sep_len = strlen(separator);
     
-    for (size_t i = 0; i < arr.count; i++) {
+    for (usize i = 0; i < arr.count; i++) {
         total_len += arr.items[i].len;
         if (i > 0) total_len += sep_len;
     }
     
-    string result = string_new(total_len);
+    string result = string_new(arr.arena, total_len);
     
-    for (size_t i = 0; i < arr.count; i++) {
+    for (usize i = 0; i < arr.count; i++) {
         if (i > 0) string_append(&result, separator);
         string_append(&result, arr.items[i].data);
     }
@@ -428,194 +424,7 @@ string string_join(string_array arr, const char* separator) {
 }
 // ------------ STRING END
 
-
-// Platform detection
-#ifdef __APPLE__
-    #define PLATFORM "macos"
-    #define SO_EXT "dylib"
-#elif defined(_WIN32)
-    #define PLATFORM "windows"
-    #define SO_EXT "dll"
-#else
-    #define PLATFORM "linux"
-    #define SO_EXT "so"
-#endif
-
-#ifndef CC
-    #if _WIN32
-        #if defined(__GNUC__)
-            #define CC "cc"
-        #elif defined(__clang__)
-            #define CC "clang"
-        #elif defined(_MSC_VER)
-            #define CC "cl.exe"
-        #endif
-    #else
-        #define CC "cc"
-    #endif
-#endif
-
-bool cmd_v(const char *fmt, va_list args) {
-    char buffer[4096];
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    
-    printf("%s\n", buffer);
-    return system(buffer) == 0;
-}
-
-bool cmd(const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    bool result = cmd_v(fmt, args);
-    va_end(args);
-    return result;
-}
-
-bool cmd_string(string fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    bool result = cmd_v(fmt.data, args);
-    va_end(args);
-    return result;
-}
-
-#define CMD(fmt, ...) _Generic((fmt), \
-    char*: cmd, \
-    const char*: cmd, \
-    string: cmd_string, \
-    default: cmd \
-)(fmt, ##__VA_ARGS__)
-
-static bool force_rebuild = false;
-
-// Check if target needs rebuild
-// TODO: target windows
-bool needs_rebuild(const char *target, const char *source) {
-    if (force_rebuild) return true;
-
-    // printf("needs_rebuild %s, source=%s\n", target, source);
-    struct stat target_stat, source_stat;
-    
-    if (stat(target, &target_stat) != 0) {
-        return true; // Target doesn't exist
-    }
-    
-    if (stat(source, &source_stat) != 0) {
-        fprintf(stderr, "Error: source file '%s' not found\n", source);
-        exit(1);
-    }
-    
-    return source_stat.st_mtime > target_stat.st_mtime;
-}
-
-// Multi-source dependency checking
-bool needs_rebuild_many(const char *target, string_array sources) {
-    for (int i = 0; i < sources.count; i++) {
-        if (needs_rebuild(target, sources.items[i].data)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-#define REBUILD_SELF(argc, argv) rebuild_self(argc, argv, __FILE__)
-
-// Auto-rebuild the build program
-void rebuild_self(int argc, char *argv[], const char *source) {
-    (void)argc;
-    const char *self = argv[0];
-    
-    if (needs_rebuild(self, source)) {
-        printf("Rebuilding program...\n");
-        if (!cmd(CC " -o %s %s", self, source)) {
-            exit(1);
-        }
-        
-        // Re-execute
-        execvp(self, argv);
-        perror("execvp");
-        exit(1);
-    }
-}
-void rebuild_deps(int argc, char *argv[], string_array sources) {
-    (void)argc;
-    const char *self = argv[0];
-    
-    if (needs_rebuild_many(self, sources)) {
-        printf("Rebuilding program...\n");
-        if (!cmd(CC " -o %s %s", self, sources.items[0])) {
-            exit(1);
-        }
-        
-        // Re-execute
-        execvp(self, argv);
-        perror("execvp");
-        exit(1);
-    }
-}
-
-// Join sources into a single string
-void join_strings(char *buffer, size_t size, const char *sources[], size_t sources_size) {
-    buffer[0] = '\0';
-    for (size_t i = 0; i < sources_size; i++) {
-        strlcat(buffer, sources[i], size);
-        strlcat(buffer, " ", size);
-    }
-}
-
-int bin2c(char *bin_file, char *c_file, char *opt_name) {
-    const char *name;
-    FILE *input, *output;
-    unsigned int length = 0;
-    unsigned char data;
-
-    input = fopen(bin_file, "rb");
-    if (!input)
-        return -1;
-
-    output = fopen(c_file, "wb");
-    if (!output) {
-        fclose(input);
-        return -1;
-    }
-
-    if (opt_name == NULL) {
-        name = c_file;
-    } else {
-        size_t arglen = strlen(bin_file);
-        name = bin_file;
-
-        for (size_t i = 0; i < arglen; i++) {
-            if (bin_file[i] == '.')
-                bin_file[i] = '_';
-            else if (bin_file[i] == '/')
-                name = &bin_file[i+1];
-        }
-    }
-
-    fprintf(output, "const unsigned char %s_data[] = { ", name);
-
-    while (fread(&data, 1, 1, input) > 0) {
-        if (length % 12 == 0) fprintf(output, "\n\t");
-        fprintf(output, "0x%02x, ", data);
-        length++;
-    }
-
-    fprintf(output, "0x00\n");
-    fprintf(output, "};\n");
-    fprintf(output, "const unsigned int %s_len = %u;\n\n", name, length);
-
-    fclose(output);
-
-    if (ferror(input) || !feof(input)) {
-        fclose(input);
-        return -1;
-    }
-
-    fclose(input);
-
-    return 0;
-}
+#endif // BASE_IMPL
 
 #ifdef __cplusplus
 }
