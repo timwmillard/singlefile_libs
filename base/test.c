@@ -1,4 +1,7 @@
+
+#define BASE_IMPL
 #include "base.h"
+
 #include "../deps/myassert.h"
 
 #define RUN(func) do { \
@@ -15,9 +18,9 @@ void test_arena() {
 
 }
 
-void test_arena_string() {
+void test_string() {
     arena a = {0};
-    string s = string_arena_from(&a, "Hello world\n");
+    string s = string_from(&a, "Hello world\n");
     ASSERT_EQ_STR(s.data, "Hello world\n");
 
     string_append(&s, "Hello world\n");
@@ -26,12 +29,17 @@ void test_arena_string() {
     arena_release(&a);
 }
 
-void test_string() {
-    string s = string_from("Hello world\n");
+void test_string2() {
+    arena a = {0};
+    string s = string_from(&a, "Hello world\n");
     ASSERT_EQ_STR(s.data, "Hello world\n");
 
     string_append(&s, "Hello world\n");
     ASSERT_EQ_STR(s.data, "Hello world\nHello world\n");
+
+    printf("This string is " STR_FMT, STR_ARG(s));
+
+    arena_release(&a);
 }
 
 int main(int argc, char *argv[]) {
@@ -47,8 +55,8 @@ int main(int argc, char *argv[]) {
     printf("--------------------\n");
 
     RUN(test_arena);
-    RUN(test_arena_string);
     RUN(test_string);
+    RUN(test_string2);
 
     printf("--------------------\n");
     printf("All tests \033[32mPASSED\033[0m\n");

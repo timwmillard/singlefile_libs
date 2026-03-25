@@ -87,6 +87,8 @@ void arena_reset(arena *a);
 void arena_release(arena *a);
 
 
+// string type can be eithre owned string or a string view.
+// If cap is equal to zero, then is a view else it's owned.
 typedef struct {
     char* data;
     usize len;
@@ -94,12 +96,14 @@ typedef struct {
     arena *arena;
 } string;
 
+#define STR_FMT "%.*s"
+#define STR_ARG(str) (int)(str).len, (str).data
+
 string string_new(arena *a, usize capacity);
 string string_from(arena *a, const char* str);
+string string_from_len(arena *a, const char* str, int len);
 void string_append(string* s, const char* str);
 string string_view(const char* str);
-string cstringl(arena *a, const char* str, int len);
-string cstring(arena *a, const char* str);
 void string_push(string* s, char c);
 string string_slice(string s, int start, int end);
 bool string_starts_with(string s, const char* prefix);
@@ -108,7 +112,7 @@ int string_find(string s, const char* needle);
 string string_trim(string s);
 string string_upper(string s);
 string string_lower(string s);
-const char *cstr(string *s);
+const char *cstring(string *s);
 
 #ifdef BASE_IMPL
 
@@ -191,13 +195,17 @@ string string_new(arena *a, usize capacity) {
     };
 }
 
-// Create owned string from C string
-string string_from(arena *a, const char* str) {
-    usize len = strlen(str);
+string string_from_len(arena *a, const char* str, int len) {
     string s = string_new(a, len);
     strcpy(s.data, str);
     s.len = len;
     return s;
+}
+
+// Create owned string from C string
+string string_from(arena *a, const char* str) {
+    usize len = strlen(str);
+    return string_from_len(a, str, len);
 }
 
 // Ensure capacity for owned strings
@@ -235,20 +243,6 @@ string string_view(const char* str) {
     };
 }
 
-// Create owned string from C string with len
-string cstringl(arena *a, const char* str, int len) {
-    string s = string_new(a, len);
-    strcpy(s.data, str);
-    s.len = len;
-    return s;
-}
-
-// Create owned string from C string
-string cstring(arena *a, const char* str) {
-    usize len = strlen(str);
-    return cstringl(a, str, len);
-}
-
 // Append character
 void string_push(string* s, char c) {
     if (s->len + 1 > s->cap) {
@@ -264,7 +258,7 @@ string string_slice(string s, int start, int end) {
     if (end < 0) end = s.len + end;
     if (start < 0) start = 0;
     if (end > (int)s.len) end = s.len;
-    if (start >= end) return cstring(s.arena, "");
+    if (start >= end) return string_from(s.arena, "");
     
     return (string){
         .data = s.data + start,
@@ -319,7 +313,7 @@ string string_lower(string s) {
 }
 
 // Returns the string as a null-terminated C string
-const char *cstr(string *s) {
+const char *cstring(string *s) {
     // Make sure we have capacity for the null terminator
     if (s->len > s->cap) {
         _string_reserve(s, s->arena, s->len * 2);  // double capacity
