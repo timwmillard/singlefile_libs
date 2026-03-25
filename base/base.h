@@ -87,8 +87,24 @@ void arena_reset(arena *a);
 void arena_release(arena *a);
 
 
-// string type can be eithre owned string or a string view.
-// If cap is equal to zero, then is a view else it's owned.
+// A string is one of three kinds, determined by arena and cap:
+//
+//   cap    arena     Meaning
+//   -----  --------  -------------------------------------------------------
+//   == 0   non-NULL  arena-owned, empty, not yet allocated
+//   > 0    non-NULL  arena-owned, growable
+//   > 0    NULL      fixed-capacity (stack/static buffer), mutable up to cap
+//   == 0   NULL      view — non-owning, must not be mutated
+//
+//   arena != NULL  =>  owned by arena, can grow on demand
+//   arena == NULL  =>  no allocator; cap > 0 means fixed buffer, cap == 0 means view
+//
+// Constructors:
+//   string_alloc(a, cap)        arena-owned, pre-allocated to cap
+//   string_from(a, cstr)        arena-owned, copied from a C string
+//   string_from_n(a, cstr, n)   arena-owned, copied from a C string with explicit length
+//   string_fixed(buf, cap)      fixed-capacity, backed by an existing buffer (arena == NULL)
+//   string_view(cstr)           view of a C string, no allocation
 typedef struct {
     char* data;
     usize len;
@@ -96,14 +112,26 @@ typedef struct {
     arena *arena;
 } string;
 
+typedef struct {
+    char* data;
+    usize len;
+} stringv;
+
+#define STRV(s) (stringv)(s)
+
 #define STR_FMT "%.*s"
 #define STR_ARG(str) (int)(str).len, (str).data
 
-string string_new(arena *a, usize capacity);
+string string_alloc(arena *a, usize cap);
 string string_from(arena *a, const char* str);
-string string_from_len(arena *a, const char* str, int len);
-void string_append(string* s, const char* str);
+string string_from_n(arena *a, const char* str, int len);
+string string_fixed(char *buf, usize cap);
+string string_fixed_n(char *buf, int len, usize cap);
 string string_view(const char* str);
+string string_view_n(const char* str, int len);
+
+void string_append(string* s, const char* str);
+void string_append(string* s, const char* str);
 void string_push(string* s, char c);
 string string_slice(string s, int start, int end);
 bool string_starts_with(string s, const char* prefix);
@@ -184,7 +212,7 @@ void arena_release(arena *a) {
     a->end = NULL;
 }
 
-string string_new(arena *a, usize capacity) {
+string string_alloc(arena *a, usize capacity) {
     char* data = arena_alloc(a, capacity + 1);
     data[0] = '\0';
     return (string){
@@ -195,21 +223,45 @@ string string_new(arena *a, usize capacity) {
     };
 }
 
-string string_from_len(arena *a, const char* str, int len) {
-    string s = string_new(a, len);
+string string_from_n(arena *a, const char* str, int len) {
+    string s = string_alloc(a, len);
     strcpy(s.data, str);
     s.len = len;
     return s;
 }
 
-// Create owned string from C string
 string string_from(arena *a, const char* str) {
     usize len = strlen(str);
-    return string_from_len(a, str, len);
+    return string_from_n(a, str, len);
+}
+
+string string_fixed_n(char *buf, int len, usize cap) {
+    return (string) {
+        .data = buf,
+        .len = len,
+        .cap = cap,
+    };
+}
+
+string string_fixed(char *buf, usize cap) {
+    int len = strlen(buf);
+    return string_fixed_n(buf, len, cap);
+}
+
+string string_view_n(const char* str, int len) {
+    return (string){
+        .data = (char*)str,
+        .len = len,
+    };
+}
+
+string string_view(const char* str) {
+    int len = strlen(str);
+    return string_view_n(str, len);
 }
 
 // Ensure capacity for owned strings
-void _string_reserve(string* s, arena *a, usize new_cap) {
+static void string_reserve(string* s, arena *a, usize new_cap) {
    if (new_cap > s->cap) {
         if (s->arena) {
             // Arena-allocated string: use arena_realloc
@@ -224,29 +276,22 @@ void _string_reserve(string* s, arena *a, usize new_cap) {
 
 // Append to string
 void string_append(string* s, const char* str) {
+    if (s->cap == 0) return;
     usize add_len = strlen(str);
     usize new_len = s->len + add_len;
     
     if (new_len > s->cap) {
-        _string_reserve(s, s->arena, new_len * 2);  // double capacity
+        string_reserve(s, s->arena, new_len * 2);  // double capacity
     }
     
     strcpy(s->data + s->len, str);
     s->len = new_len;
 }
 
-// Create string from literal (view - doesn't own memory)
-string string_view(const char* str) {
-    return (string){
-        .data = (char*)str,
-        .len = strlen(str),
-    };
-}
-
 // Append character
 void string_push(string* s, char c) {
     if (s->len + 1 > s->cap) {
-        _string_reserve(s, s->arena, (s->cap + 1) * 2);
+        string_reserve(s, s->arena, (s->cap + 1) * 2);
     }
     s->data[s->len++] = c;
     s->data[s->len] = '\0';
@@ -316,7 +361,7 @@ string string_lower(string s) {
 const char *cstring(string *s) {
     // Make sure we have capacity for the null terminator
     if (s->len > s->cap) {
-        _string_reserve(s, s->arena, s->len * 2);  // double capacity
+        string_reserve(s, s->arena, s->len * 2);  // double capacity
     }
     
     // Add null terminator
@@ -407,7 +452,7 @@ string string_join(string_array arr, const char* separator) {
         if (i > 0) total_len += sep_len;
     }
     
-    string result = string_new(arr.arena, total_len);
+    string result = string_alloc(arr.arena, total_len);
     
     for (usize i = 0; i < arr.count; i++) {
         if (i > 0) string_append(&result, separator);

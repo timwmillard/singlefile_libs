@@ -22,7 +22,29 @@ static int _failed = 0;
 
 #define ASSERT_STR(s, cstr) ASSERT((s).len == strlen(cstr) && strncmp((s).data, cstr, (s).len) == 0)
 
-/* string_from: len and data match the source */
+/* string_alloc: empty arena string with preallocated capacity */
+void test_string_alloc() {
+    arena a = {0};
+    string s = string_alloc(&a, 16);
+    ASSERT(s.len == 0);
+    ASSERT(s.cap == 16);
+    ASSERT(s.arena == &a);
+    arena_release(&a);
+    PASS("string_alloc");
+}
+
+/* string_alloc: cap==0 still arena-owned (empty, not yet allocated) */
+void test_string_alloc_zero() {
+    arena a = {0};
+    string s = string_alloc(&a, 0);
+    ASSERT(s.len == 0);
+    ASSERT(s.cap == 0);
+    ASSERT(s.arena == &a);
+    arena_release(&a);
+    PASS("string_alloc_zero");
+}
+
+/* string_from: copy from C string, arena-owned */
 void test_string_from() {
     arena a = {0};
     string s = string_from(&a, "hello");
@@ -33,22 +55,58 @@ void test_string_from() {
     PASS("string_from");
 }
 
-/* string_from_len: only takes the specified number of chars */
-void test_string_from_len() {
+/* string_from_n: copy only n chars from C string */
+void test_string_from_n() {
     arena a = {0};
-    string s = string_from_len(&a, "hello world", 5);
+    string s = string_from_n(&a, "hello world", 5);
     ASSERT_STR(s, "hello");
+    ASSERT(s.arena == &a);
     arena_release(&a);
-    PASS("string_from_len");
+    PASS("string_from_n");
 }
 
-/* string_view: points into the original, no arena needed */
-void test_string_view() {
-    string s = string_view("hello");
+/* string_fixed: wrap existing buffer, len from strlen */
+void test_string_fixed() {
+    char buf[32] = "hello";
+    string s = string_fixed(buf, sizeof(buf));
     ASSERT(s.len == 5);
-    ASSERT(strncmp(s.data, "hello", 5) == 0);
+    ASSERT(s.cap == 32);
     ASSERT(s.arena == NULL);
+    ASSERT(s.data == buf);
+    PASS("string_fixed");
+}
+
+/* string_fixed_n: wrap existing buffer with explicit len */
+void test_string_fixed_n() {
+    char buf[32] = "hello world";
+    string s = string_fixed_n(buf, 5, sizeof(buf));
+    ASSERT(s.len == 5);
+    ASSERT(s.cap == 32);
+    ASSERT(s.arena == NULL);
+    ASSERT(strncmp(s.data, "hello", 5) == 0);
+    PASS("string_fixed_n");
+}
+
+/* string_view: non-owning view of a C string */
+void test_string_view() {
+    const char *lit = "hello";
+    string s = string_view(lit);
+    ASSERT(s.len == 5);
+    ASSERT(s.cap == 0);
+    ASSERT(s.arena == NULL);
+    ASSERT(s.data == lit);
     PASS("string_view");
+}
+
+/* string_view_n: non-owning view of n chars */
+void test_string_view_n() {
+    const char *lit = "hello world";
+    string s = string_view_n(lit, 5);
+    ASSERT(s.len == 5);
+    ASSERT(s.cap == 0);
+    ASSERT(s.arena == NULL);
+    ASSERT(strncmp(s.data, "hello", 5) == 0);
+    PASS("string_view_n");
 }
 
 /* string_append: grows and concatenates correctly */
@@ -66,7 +124,7 @@ void test_string_append() {
 /* string_push: appends a single character and stays null-terminated */
 void test_string_push() {
     arena a = {0};
-    string s = string_new(&a, 4);
+    string s = string_alloc(&a, 4);
     string_push(&s, 'a');
     string_push(&s, 'b');
     string_push(&s, 'c');
@@ -173,9 +231,14 @@ void test_string_join() {
 int main(void) {
     printf(COLOR_BOLD "\nstring tests\n" COLOR_RESET "\n");
 
+    test_string_alloc();
+    test_string_alloc_zero();
     test_string_from();
-    test_string_from_len();
+    test_string_from_n();
+    test_string_fixed();
+    test_string_fixed_n();
     test_string_view();
+    test_string_view_n();
     test_string_append();
     test_string_push();
     test_string_slice();
