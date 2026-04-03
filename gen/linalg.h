@@ -15,7 +15,7 @@
 #  endif
 #endif
 
-// ── vec2 ──
+// ── bvec2 ──
 
 typedef struct {
     union {
@@ -24,6 +24,462 @@ typedef struct {
             uint8_t y;
         };
         uint8_t v[2];
+    };
+} bvec2;
+
+static inline bvec2 bvec2_add(bvec2 a, bvec2 b) {
+    bvec2 r;
+    for (int i = 0; i < 2; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline bvec2 bvec2_sub(bvec2 a, bvec2 b) {
+    bvec2 r;
+    for (int i = 0; i < 2; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline bvec2 bvec2_scale(bvec2 a, uint8_t s) {
+    bvec2 r;
+    for (int i = 0; i < 2; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline uint8_t bvec2_dot(bvec2 a, bvec2 b) {
+    uint8_t r = 0;
+    for (int i = 0; i < 2; i++)
+        r += a.v[i] * b.v[i];
+    return r;
+}
+
+static inline float bvec2_len(bvec2 a) {
+    float r = 0;
+    for (int i = 0; i < 2; i++)
+        r += (float)a.v[i] * (float)a.v[i];
+    return sqrtf(r);
+}
+
+// ── bvec3 ──
+
+typedef struct {
+    union {
+        struct {
+            uint8_t x;
+            uint8_t y;
+            uint8_t z;
+        };
+        uint8_t v[3];
+    };
+} bvec3;
+
+static inline bvec3 bvec3_add(bvec3 a, bvec3 b) {
+    bvec3 r;
+    for (int i = 0; i < 3; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline bvec3 bvec3_sub(bvec3 a, bvec3 b) {
+    bvec3 r;
+    for (int i = 0; i < 3; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline bvec3 bvec3_scale(bvec3 a, uint8_t s) {
+    bvec3 r;
+    for (int i = 0; i < 3; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline uint8_t bvec3_dot(bvec3 a, bvec3 b) {
+    uint8_t r = 0;
+    for (int i = 0; i < 3; i++)
+        r += a.v[i] * b.v[i];
+    return r;
+}
+
+static inline float bvec3_len(bvec3 a) {
+    float r = 0;
+    for (int i = 0; i < 3; i++)
+        r += (float)a.v[i] * (float)a.v[i];
+    return sqrtf(r);
+}
+
+static inline bvec3 bvec3_cross(bvec3 a, bvec3 b) {
+    return (bvec3){
+        a.y*b.z - a.z*b.y,
+        a.z*b.x - a.x*b.z,
+        a.x*b.y - a.y*b.x,
+    };
+}
+
+// ── bvec4 ──
+
+typedef struct {
+    union {
+        struct {
+            uint8_t x;
+            uint8_t y;
+            uint8_t z;
+            uint8_t w;
+        };
+        uint8_t v[4];
+    };
+} bvec4;
+
+static inline bvec4 bvec4_add(bvec4 a, bvec4 b) {
+    bvec4 r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline bvec4 bvec4_sub(bvec4 a, bvec4 b) {
+    bvec4 r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline bvec4 bvec4_scale(bvec4 a, uint8_t s) {
+    bvec4 r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline uint8_t bvec4_dot(bvec4 a, bvec4 b) {
+    uint8_t r = 0;
+    for (int i = 0; i < 4; i++)
+        r += a.v[i] * b.v[i];
+    return r;
+}
+
+static inline float bvec4_len(bvec4 a) {
+    float r = 0;
+    for (int i = 0; i < 4; i++)
+        r += (float)a.v[i] * (float)a.v[i];
+    return sqrtf(r);
+}
+
+// ── ivec2 ──
+
+typedef struct {
+    union {
+        struct {
+            int32_t x;
+            int32_t y;
+        };
+        int32_t v[2];
+    };
+} ivec2;
+
+static inline ivec2 ivec2_add(ivec2 a, ivec2 b) {
+    ivec2 r;
+    for (int i = 0; i < 2; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline ivec2 ivec2_sub(ivec2 a, ivec2 b) {
+    ivec2 r;
+    for (int i = 0; i < 2; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline ivec2 ivec2_scale(ivec2 a, int32_t s) {
+    ivec2 r;
+    for (int i = 0; i < 2; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline int32_t ivec2_dot(ivec2 a, ivec2 b) {
+    int32_t r = 0;
+    for (int i = 0; i < 2; i++)
+        r += a.v[i] * b.v[i];
+    return r;
+}
+
+static inline float ivec2_len(ivec2 a) {
+    float r = 0;
+    for (int i = 0; i < 2; i++)
+        r += (float)a.v[i] * (float)a.v[i];
+    return sqrtf(r);
+}
+
+// ── ivec3 ──
+
+typedef struct {
+    union {
+        struct {
+            int32_t x;
+            int32_t y;
+            int32_t z;
+        };
+        int32_t v[3];
+    };
+} ivec3;
+
+static inline ivec3 ivec3_add(ivec3 a, ivec3 b) {
+    ivec3 r;
+    for (int i = 0; i < 3; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline ivec3 ivec3_sub(ivec3 a, ivec3 b) {
+    ivec3 r;
+    for (int i = 0; i < 3; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline ivec3 ivec3_scale(ivec3 a, int32_t s) {
+    ivec3 r;
+    for (int i = 0; i < 3; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline int32_t ivec3_dot(ivec3 a, ivec3 b) {
+    int32_t r = 0;
+    for (int i = 0; i < 3; i++)
+        r += a.v[i] * b.v[i];
+    return r;
+}
+
+static inline float ivec3_len(ivec3 a) {
+    float r = 0;
+    for (int i = 0; i < 3; i++)
+        r += (float)a.v[i] * (float)a.v[i];
+    return sqrtf(r);
+}
+
+static inline ivec3 ivec3_cross(ivec3 a, ivec3 b) {
+    return (ivec3){
+        a.y*b.z - a.z*b.y,
+        a.z*b.x - a.x*b.z,
+        a.x*b.y - a.y*b.x,
+    };
+}
+
+// ── ivec4 ──
+
+typedef struct {
+    union {
+        struct {
+            int32_t x;
+            int32_t y;
+            int32_t z;
+            int32_t w;
+        };
+        int32_t v[4];
+    };
+} ivec4;
+
+static inline ivec4 ivec4_add(ivec4 a, ivec4 b) {
+    ivec4 r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline ivec4 ivec4_sub(ivec4 a, ivec4 b) {
+    ivec4 r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline ivec4 ivec4_scale(ivec4 a, int32_t s) {
+    ivec4 r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline int32_t ivec4_dot(ivec4 a, ivec4 b) {
+    int32_t r = 0;
+    for (int i = 0; i < 4; i++)
+        r += a.v[i] * b.v[i];
+    return r;
+}
+
+static inline float ivec4_len(ivec4 a) {
+    float r = 0;
+    for (int i = 0; i < 4; i++)
+        r += (float)a.v[i] * (float)a.v[i];
+    return sqrtf(r);
+}
+
+// ── uvec2 ──
+
+typedef struct {
+    union {
+        struct {
+            uint32_t x;
+            uint32_t y;
+        };
+        uint32_t v[2];
+    };
+} uvec2;
+
+static inline uvec2 uvec2_add(uvec2 a, uvec2 b) {
+    uvec2 r;
+    for (int i = 0; i < 2; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline uvec2 uvec2_sub(uvec2 a, uvec2 b) {
+    uvec2 r;
+    for (int i = 0; i < 2; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline uvec2 uvec2_scale(uvec2 a, uint32_t s) {
+    uvec2 r;
+    for (int i = 0; i < 2; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline uint32_t uvec2_dot(uvec2 a, uvec2 b) {
+    uint32_t r = 0;
+    for (int i = 0; i < 2; i++)
+        r += a.v[i] * b.v[i];
+    return r;
+}
+
+static inline float uvec2_len(uvec2 a) {
+    float r = 0;
+    for (int i = 0; i < 2; i++)
+        r += (float)a.v[i] * (float)a.v[i];
+    return sqrtf(r);
+}
+
+// ── uvec3 ──
+
+typedef struct {
+    union {
+        struct {
+            uint32_t x;
+            uint32_t y;
+            uint32_t z;
+        };
+        uint32_t v[3];
+    };
+} uvec3;
+
+static inline uvec3 uvec3_add(uvec3 a, uvec3 b) {
+    uvec3 r;
+    for (int i = 0; i < 3; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline uvec3 uvec3_sub(uvec3 a, uvec3 b) {
+    uvec3 r;
+    for (int i = 0; i < 3; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline uvec3 uvec3_scale(uvec3 a, uint32_t s) {
+    uvec3 r;
+    for (int i = 0; i < 3; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline uint32_t uvec3_dot(uvec3 a, uvec3 b) {
+    uint32_t r = 0;
+    for (int i = 0; i < 3; i++)
+        r += a.v[i] * b.v[i];
+    return r;
+}
+
+static inline float uvec3_len(uvec3 a) {
+    float r = 0;
+    for (int i = 0; i < 3; i++)
+        r += (float)a.v[i] * (float)a.v[i];
+    return sqrtf(r);
+}
+
+static inline uvec3 uvec3_cross(uvec3 a, uvec3 b) {
+    return (uvec3){
+        a.y*b.z - a.z*b.y,
+        a.z*b.x - a.x*b.z,
+        a.x*b.y - a.y*b.x,
+    };
+}
+
+// ── uvec4 ──
+
+typedef struct {
+    union {
+        struct {
+            uint32_t x;
+            uint32_t y;
+            uint32_t z;
+            uint32_t w;
+        };
+        uint32_t v[4];
+    };
+} uvec4;
+
+static inline uvec4 uvec4_add(uvec4 a, uvec4 b) {
+    uvec4 r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] + b.v[i];
+    return r;
+}
+
+static inline uvec4 uvec4_sub(uvec4 a, uvec4 b) {
+    uvec4 r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] - b.v[i];
+    return r;
+}
+
+static inline uvec4 uvec4_scale(uvec4 a, uint32_t s) {
+    uvec4 r;
+    for (int i = 0; i < 4; i++)
+        r.v[i] = a.v[i] * s;
+    return r;
+}
+
+static inline uint32_t uvec4_dot(uvec4 a, uvec4 b) {
+    uint32_t r = 0;
+    for (int i = 0; i < 4; i++)
+        r += a.v[i] * b.v[i];
+    return r;
+}
+
+static inline float uvec4_len(uvec4 a) {
+    float r = 0;
+    for (int i = 0; i < 4; i++)
+        r += (float)a.v[i] * (float)a.v[i];
+    return sqrtf(r);
+}
+
+// ── vec2 ──
+
+typedef struct {
+    union {
+        struct {
+            float x;
+            float y;
+        };
+        float v[2];
     };
 } vec2;
 
@@ -41,15 +497,15 @@ static inline vec2 vec2_sub(vec2 a, vec2 b) {
     return r;
 }
 
-static inline vec2 vec2_scale(vec2 a, uint8_t s) {
+static inline vec2 vec2_scale(vec2 a, float s) {
     vec2 r;
     for (int i = 0; i < 2; i++)
         r.v[i] = a.v[i] * s;
     return r;
 }
 
-static inline uint8_t vec2_dot(vec2 a, vec2 b) {
-    uint8_t r = 0;
+static inline float vec2_dot(vec2 a, vec2 b) {
+    float r = 0;
     for (int i = 0; i < 2; i++)
         r += a.v[i] * b.v[i];
     return r;
@@ -62,16 +518,20 @@ static inline float vec2_len(vec2 a) {
     return sqrtf(r);
 }
 
+static inline vec2 vec2_norm(vec2 a) {
+    return vec2_scale(a, 1.0f / vec2_len(a));
+}
+
 // ── vec3 ──
 
 typedef struct {
     union {
         struct {
-            uint8_t x;
-            uint8_t y;
-            uint8_t z;
+            float x;
+            float y;
+            float z;
         };
-        uint8_t v[3];
+        float v[3];
     };
 } vec3;
 
@@ -89,15 +549,15 @@ static inline vec3 vec3_sub(vec3 a, vec3 b) {
     return r;
 }
 
-static inline vec3 vec3_scale(vec3 a, uint8_t s) {
+static inline vec3 vec3_scale(vec3 a, float s) {
     vec3 r;
     for (int i = 0; i < 3; i++)
         r.v[i] = a.v[i] * s;
     return r;
 }
 
-static inline uint8_t vec3_dot(vec3 a, vec3 b) {
-    uint8_t r = 0;
+static inline float vec3_dot(vec3 a, vec3 b) {
+    float r = 0;
     for (int i = 0; i < 3; i++)
         r += a.v[i] * b.v[i];
     return r;
@@ -108,6 +568,10 @@ static inline float vec3_len(vec3 a) {
     for (int i = 0; i < 3; i++)
         r += (float)a.v[i] * (float)a.v[i];
     return sqrtf(r);
+}
+
+static inline vec3 vec3_norm(vec3 a) {
+    return vec3_scale(a, 1.0f / vec3_len(a));
 }
 
 static inline vec3 vec3_cross(vec3 a, vec3 b) {
@@ -123,12 +587,12 @@ static inline vec3 vec3_cross(vec3 a, vec3 b) {
 typedef struct {
     union {
         struct {
-            uint8_t x;
-            uint8_t y;
-            uint8_t z;
-            uint8_t w;
+            float x;
+            float y;
+            float z;
+            float w;
         };
-        uint8_t v[4];
+        float v[4];
     };
 } vec4;
 
@@ -146,15 +610,15 @@ static inline vec4 vec4_sub(vec4 a, vec4 b) {
     return r;
 }
 
-static inline vec4 vec4_scale(vec4 a, uint8_t s) {
+static inline vec4 vec4_scale(vec4 a, float s) {
     vec4 r;
     for (int i = 0; i < 4; i++)
         r.v[i] = a.v[i] * s;
     return r;
 }
 
-static inline uint8_t vec4_dot(vec4 a, vec4 b) {
-    uint8_t r = 0;
+static inline float vec4_dot(vec4 a, vec4 b) {
+    float r = 0;
     for (int i = 0; i < 4; i++)
         r += a.v[i] * b.v[i];
     return r;
@@ -167,472 +631,8 @@ static inline float vec4_len(vec4 a) {
     return sqrtf(r);
 }
 
-// ── vec2i ──
-
-typedef struct {
-    union {
-        struct {
-            int32_t x;
-            int32_t y;
-        };
-        int32_t v[2];
-    };
-} vec2i;
-
-static inline vec2i vec2i_add(vec2i a, vec2i b) {
-    vec2i r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec2i vec2i_sub(vec2i a, vec2i b) {
-    vec2i r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec2i vec2i_scale(vec2i a, int32_t s) {
-    vec2i r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline int32_t vec2i_dot(vec2i a, vec2i b) {
-    int32_t r = 0;
-    for (int i = 0; i < 2; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline float vec2i_len(vec2i a) {
-    float r = 0;
-    for (int i = 0; i < 2; i++)
-        r += (float)a.v[i] * (float)a.v[i];
-    return sqrtf(r);
-}
-
-// ── vec3i ──
-
-typedef struct {
-    union {
-        struct {
-            int32_t x;
-            int32_t y;
-            int32_t z;
-        };
-        int32_t v[3];
-    };
-} vec3i;
-
-static inline vec3i vec3i_add(vec3i a, vec3i b) {
-    vec3i r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec3i vec3i_sub(vec3i a, vec3i b) {
-    vec3i r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec3i vec3i_scale(vec3i a, int32_t s) {
-    vec3i r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline int32_t vec3i_dot(vec3i a, vec3i b) {
-    int32_t r = 0;
-    for (int i = 0; i < 3; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline float vec3i_len(vec3i a) {
-    float r = 0;
-    for (int i = 0; i < 3; i++)
-        r += (float)a.v[i] * (float)a.v[i];
-    return sqrtf(r);
-}
-
-static inline vec3i vec3i_cross(vec3i a, vec3i b) {
-    return (vec3i){
-        a.y*b.z - a.z*b.y,
-        a.z*b.x - a.x*b.z,
-        a.x*b.y - a.y*b.x,
-    };
-}
-
-// ── vec4i ──
-
-typedef struct {
-    union {
-        struct {
-            int32_t x;
-            int32_t y;
-            int32_t z;
-            int32_t w;
-        };
-        int32_t v[4];
-    };
-} vec4i;
-
-static inline vec4i vec4i_add(vec4i a, vec4i b) {
-    vec4i r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec4i vec4i_sub(vec4i a, vec4i b) {
-    vec4i r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec4i vec4i_scale(vec4i a, int32_t s) {
-    vec4i r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline int32_t vec4i_dot(vec4i a, vec4i b) {
-    int32_t r = 0;
-    for (int i = 0; i < 4; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline float vec4i_len(vec4i a) {
-    float r = 0;
-    for (int i = 0; i < 4; i++)
-        r += (float)a.v[i] * (float)a.v[i];
-    return sqrtf(r);
-}
-
-// ── vec2u ──
-
-typedef struct {
-    union {
-        struct {
-            uint32_t x;
-            uint32_t y;
-        };
-        uint32_t v[2];
-    };
-} vec2u;
-
-static inline vec2u vec2u_add(vec2u a, vec2u b) {
-    vec2u r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec2u vec2u_sub(vec2u a, vec2u b) {
-    vec2u r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec2u vec2u_scale(vec2u a, uint32_t s) {
-    vec2u r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline uint32_t vec2u_dot(vec2u a, vec2u b) {
-    uint32_t r = 0;
-    for (int i = 0; i < 2; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline float vec2u_len(vec2u a) {
-    float r = 0;
-    for (int i = 0; i < 2; i++)
-        r += (float)a.v[i] * (float)a.v[i];
-    return sqrtf(r);
-}
-
-// ── vec3u ──
-
-typedef struct {
-    union {
-        struct {
-            uint32_t x;
-            uint32_t y;
-            uint32_t z;
-        };
-        uint32_t v[3];
-    };
-} vec3u;
-
-static inline vec3u vec3u_add(vec3u a, vec3u b) {
-    vec3u r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec3u vec3u_sub(vec3u a, vec3u b) {
-    vec3u r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec3u vec3u_scale(vec3u a, uint32_t s) {
-    vec3u r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline uint32_t vec3u_dot(vec3u a, vec3u b) {
-    uint32_t r = 0;
-    for (int i = 0; i < 3; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline float vec3u_len(vec3u a) {
-    float r = 0;
-    for (int i = 0; i < 3; i++)
-        r += (float)a.v[i] * (float)a.v[i];
-    return sqrtf(r);
-}
-
-static inline vec3u vec3u_cross(vec3u a, vec3u b) {
-    return (vec3u){
-        a.y*b.z - a.z*b.y,
-        a.z*b.x - a.x*b.z,
-        a.x*b.y - a.y*b.x,
-    };
-}
-
-// ── vec4u ──
-
-typedef struct {
-    union {
-        struct {
-            uint32_t x;
-            uint32_t y;
-            uint32_t z;
-            uint32_t w;
-        };
-        uint32_t v[4];
-    };
-} vec4u;
-
-static inline vec4u vec4u_add(vec4u a, vec4u b) {
-    vec4u r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec4u vec4u_sub(vec4u a, vec4u b) {
-    vec4u r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec4u vec4u_scale(vec4u a, uint32_t s) {
-    vec4u r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline uint32_t vec4u_dot(vec4u a, vec4u b) {
-    uint32_t r = 0;
-    for (int i = 0; i < 4; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline float vec4u_len(vec4u a) {
-    float r = 0;
-    for (int i = 0; i < 4; i++)
-        r += (float)a.v[i] * (float)a.v[i];
-    return sqrtf(r);
-}
-
-// ── vec2f ──
-
-typedef struct {
-    union {
-        struct {
-            float x;
-            float y;
-        };
-        float v[2];
-    };
-} vec2f;
-
-static inline vec2f vec2f_add(vec2f a, vec2f b) {
-    vec2f r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec2f vec2f_sub(vec2f a, vec2f b) {
-    vec2f r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec2f vec2f_scale(vec2f a, float s) {
-    vec2f r;
-    for (int i = 0; i < 2; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline float vec2f_dot(vec2f a, vec2f b) {
-    float r = 0;
-    for (int i = 0; i < 2; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline float vec2f_len(vec2f a) {
-    float r = 0;
-    for (int i = 0; i < 2; i++)
-        r += (float)a.v[i] * (float)a.v[i];
-    return sqrtf(r);
-}
-
-static inline vec2f vec2f_norm(vec2f a) {
-    return vec2f_scale(a, 1.0f / vec2f_len(a));
-}
-
-// ── vec3f ──
-
-typedef struct {
-    union {
-        struct {
-            float x;
-            float y;
-            float z;
-        };
-        float v[3];
-    };
-} vec3f;
-
-static inline vec3f vec3f_add(vec3f a, vec3f b) {
-    vec3f r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec3f vec3f_sub(vec3f a, vec3f b) {
-    vec3f r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec3f vec3f_scale(vec3f a, float s) {
-    vec3f r;
-    for (int i = 0; i < 3; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline float vec3f_dot(vec3f a, vec3f b) {
-    float r = 0;
-    for (int i = 0; i < 3; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline float vec3f_len(vec3f a) {
-    float r = 0;
-    for (int i = 0; i < 3; i++)
-        r += (float)a.v[i] * (float)a.v[i];
-    return sqrtf(r);
-}
-
-static inline vec3f vec3f_norm(vec3f a) {
-    return vec3f_scale(a, 1.0f / vec3f_len(a));
-}
-
-static inline vec3f vec3f_cross(vec3f a, vec3f b) {
-    return (vec3f){
-        a.y*b.z - a.z*b.y,
-        a.z*b.x - a.x*b.z,
-        a.x*b.y - a.y*b.x,
-    };
-}
-
-// ── vec4f ──
-
-typedef struct {
-    union {
-        struct {
-            float x;
-            float y;
-            float z;
-            float w;
-        };
-        float v[4];
-    };
-} vec4f;
-
-static inline vec4f vec4f_add(vec4f a, vec4f b) {
-    vec4f r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] + b.v[i];
-    return r;
-}
-
-static inline vec4f vec4f_sub(vec4f a, vec4f b) {
-    vec4f r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] - b.v[i];
-    return r;
-}
-
-static inline vec4f vec4f_scale(vec4f a, float s) {
-    vec4f r;
-    for (int i = 0; i < 4; i++)
-        r.v[i] = a.v[i] * s;
-    return r;
-}
-
-static inline float vec4f_dot(vec4f a, vec4f b) {
-    float r = 0;
-    for (int i = 0; i < 4; i++)
-        r += a.v[i] * b.v[i];
-    return r;
-}
-
-static inline float vec4f_len(vec4f a) {
-    float r = 0;
-    for (int i = 0; i < 4; i++)
-        r += (float)a.v[i] * (float)a.v[i];
-    return sqrtf(r);
-}
-
-static inline vec4f vec4f_norm(vec4f a) {
-    return vec4f_scale(a, 1.0f / vec4f_len(a));
+static inline vec4 vec4_norm(vec4 a) {
+    return vec4_scale(a, 1.0f / vec4_len(a));
 }
 
 // ── mat2f ──
