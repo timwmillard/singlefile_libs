@@ -105,6 +105,11 @@ riely:
 	wget -O deps/RFont.h https://github.com/ColleagueRiley/RFont/raw/refs/heads/main/RFont.h
 	wget -O deps/silicon.h https://github.com/ColleagueRiley/Silicon-h/raw/refs/heads/main/silicon.h
 
+quickjs:
+	wget -O deps/quickjs-amalgam.zip https://github.com/quickjs-ng/quickjs/releases/download/v0.13.0/quickjs-amalgam.zip
+	unzip -j deps/quickjs-amalgam.zip -d deps/
+	rm deps/quickjs-amalgam.zip
+
 ## Games ##
 
 cute_tiled:

@@ -1,6 +1,13 @@
 #ifndef BASE_H
 #define BASE_H
 
+// ██   ██ ███████  █████  ██████  ███████ ██████
+// ██   ██ ██      ██   ██ ██   ██ ██      ██   ██
+// ███████ █████   ███████ ██   ██ █████   ██████
+// ██   ██ ██      ██   ██ ██   ██ ██      ██   ██
+// ██   ██ ███████ ██   ██ ██████  ███████ ██   ██
+//
+// >>header
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,7 +19,6 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include <ctype.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <assert.h>
@@ -85,6 +91,8 @@ void *arena_alloc(arena *a, usize size_bytes);
 void *arena_realloc(arena *a, void *oldptr, usize oldsz, usize newsz);
 void arena_reset(arena *a);
 void arena_release(arena *a);
+char *arena_sprintf(arena *a, const char *format, ...);
+char *arena_vsprintf(arena *a, const char *format, va_list args);
 
 
 // A string is one of three kinds, determined by arena and cap:
@@ -117,21 +125,24 @@ typedef struct {
     usize len;
 } stringv;
 
-#define STRV(s) (stringv)(s)
+#define SV(s) (stringv)(s)
 
-#define STR_FMT "%.*s"
-#define STR_ARG(str) (int)(str).len, (str).data
+#define FMT_SV "%.*s"
+#define SV_ARG(str) (int)(str).len, (str).data
 
 string string_alloc(arena *a, usize cap);
-string string_from(arena *a, const char* str);
+string string_from(arena *a, const char* fmt, ...);
+string string_vfrom(arena *a, const char* fmt, va_list args);
 string string_from_n(arena *a, const char* str, int len);
 string string_fixed(char *buf, usize cap);
 string string_fixed_n(char *buf, int len, usize cap);
 string string_view(const char* str);
 string string_view_n(const char* str, int len);
+void string_reserve(string* s, usize new_cap);
 
-void string_append(string* s, const char* str);
-void string_append(string* s, const char* str);
+void string_append(string* s, const char* fmt, ...);
+void string_vappend(string* s, const char* fmt, va_list args);
+void string_append_n(string* s, const char* str, int len);
 void string_push(string* s, char c);
 string string_slice(string s, int start, int end);
 bool string_starts_with(string s, const char* prefix);
@@ -142,7 +153,18 @@ string string_upper(string s);
 string string_lower(string s);
 const char *cstring(string *s);
 
+
+
+// ██ ███    ███ ██████  ██      ███████ ███    ███ ███████ ███    ██ ████████  █████  ████████ ██  ██████  ███    ██
+// ██ ████  ████ ██   ██ ██      ██      ████  ████ ██      ████   ██    ██    ██   ██    ██    ██ ██    ██ ████   ██
+// ██ ██ ████ ██ ██████  ██      █████   ██ ████ ██ █████   ██ ██  ██    ██    ███████    ██    ██ ██    ██ ██ ██  ██
+// ██ ██  ██  ██ ██      ██      ██      ██  ██  ██ ██      ██  ██ ██    ██    ██   ██    ██    ██ ██    ██ ██  ██ ██
+// ██ ██      ██ ██      ███████ ███████ ██      ██ ███████ ██   ████    ██    ██   ██    ██    ██  ██████  ██   ████
+//
+// >>implementation
 #ifdef BASE_IMPL
+
+#include <ctype.h>
 
 arena_region *_arena_new_region(usize size) {
     usize region_cap = ARENA_REGION_DEFAULT_SIZE_BYTES / sizeof(uintptr_t);
@@ -223,14 +245,49 @@ string string_alloc(arena *a, usize capacity) {
     };
 }
 
+char *arena_vsprintf(arena *a, const char *format, va_list args)
+{
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int n = vsnprintf(NULL, 0, format, args_copy);
+    va_end(args_copy);
+
+    assert(n >= 0);
+    char *result = (char*)arena_alloc(a, n + 1);
+    vsnprintf(result, n + 1, format, args);
+
+    return result;
+}
+
+char *arena_sprintf(arena *a, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    char *result = arena_vsprintf(a, format, args);
+    va_end(args);
+
+    return result;
+}
+
 string string_from_n(arena *a, const char* str, int len) {
     string s = string_alloc(a, len);
-    strcpy(s.data, str);
+    strncpy(s.data, str, len);
     s.len = len;
     return s;
 }
 
-string string_from(arena *a, const char* str) {
+string string_from(arena *a, const char* str, ...) {
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int n = vsnprintf(NULL, 0, format, args_copy);
+    va_end(args_copy);
+
+    assert(n >= 0);
+    char *result = (char*)arena_alloc(a, n + 1);
+    vsnprintf(result, n + 1, format, args);
+
+    return result;
+
     usize len = strlen(str);
     return string_from_n(a, str, len);
 }
@@ -260,38 +317,43 @@ string string_view(const char* str) {
     return string_view_n(str, len);
 }
 
-// Ensure capacity for owned strings
-static void string_reserve(string* s, arena *a, usize new_cap) {
-   if (new_cap > s->cap) {
+// Increase the capacity
+// Away ensure extra cap for null terminator
+void string_reserve(string* s, usize new_cap) {
+    if (s->cap == 0) return;
+    if (new_cap > s->cap) {
         if (s->arena) {
             // Arena-allocated string: use arena_realloc
             s->data = arena_realloc(s->arena, s->data, s->cap + 1, new_cap + 1);
-        } else {
-            // Heap-allocated string: use realloc
-            s->data = realloc(s->data, new_cap + 1);
         }
         s->cap = new_cap;
-   }
+    }
 }
 
-// Append to string
-void string_append(string* s, const char* str) {
+void string_append_n(string* s, const char* str, int len) {
     if (s->cap == 0) return;
-    usize add_len = strlen(str);
+    usize add_len = len;
     usize new_len = s->len + add_len;
     
     if (new_len > s->cap) {
-        string_reserve(s, s->arena, new_len * 2);  // double capacity
+        string_reserve(s, new_len * 2);  // double capacity
     }
     
     strcpy(s->data + s->len, str);
     s->len = new_len;
 }
 
+// Append to string
+void string_append(string* s, const char* str, ...) {
+    if (s->cap == 0) return;
+    usize add_len = strlen(str);
+    return string_append_n(s, str, add_len);
+}
+
 // Append character
 void string_push(string* s, char c) {
     if (s->len + 1 > s->cap) {
-        string_reserve(s, s->arena, (s->cap + 1) * 2);
+        string_reserve(s, (s->cap + 1) * 2);
     }
     s->data[s->len++] = c;
     s->data[s->len] = '\0';
@@ -361,7 +423,7 @@ string string_lower(string s) {
 const char *cstring(string *s) {
     // Make sure we have capacity for the null terminator
     if (s->len > s->cap) {
-        string_reserve(s, s->arena, s->len * 2);  // double capacity
+        string_reserve(s, s->len * 2);  // double capacity
     }
     
     // Add null terminator
@@ -461,6 +523,7 @@ string string_join(string_array arr, const char* separator) {
     
     return result;
 }
+
 // ------------ STRING END
 
 #endif // BASE_IMPL
