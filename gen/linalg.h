@@ -635,45 +635,45 @@ static inline vec4 vec4_norm(vec4 a) {
     return vec4_scale(a, 1.0f / vec4_len(a));
 }
 
-// ── mat2f ──
+// ── mat2 ──
 
 typedef struct {
     union {
         float m[2][2];
         float v[4];
     };
-} mat2f;
+} mat2;
 
-static inline mat2f mat2f_identity(void) {
-    mat2f r = {0};
+static inline mat2 mat2_identity(void) {
+    mat2 r = {0};
     for (int i = 0; i < 2; i++)
         r.m[i][i] = 1.0f;
     return r;
 }
 
-static inline mat2f mat2f_add(mat2f a, mat2f b) {
-    mat2f r;
+static inline mat2 mat2_add(mat2 a, mat2 b) {
+    mat2 r;
     for (int i = 0; i < 4; i++)
         r.v[i] = a.v[i] + b.v[i];
     return r;
 }
 
-static inline mat2f mat2f_sub(mat2f a, mat2f b) {
-    mat2f r;
+static inline mat2 mat2_sub(mat2 a, mat2 b) {
+    mat2 r;
     for (int i = 0; i < 4; i++)
         r.v[i] = a.v[i] - b.v[i];
     return r;
 }
 
-static inline mat2f mat2f_scale(mat2f a, float s) {
-    mat2f r;
+static inline mat2 mat2_scale(mat2 a, float s) {
+    mat2 r;
     for (int i = 0; i < 4; i++)
         r.v[i] = a.v[i] * s;
     return r;
 }
 
-static inline mat2f mat2f_mul(mat2f a, mat2f b) {
-    mat2f r = {0};
+static inline mat2 mat2_mul(mat2 a, mat2 b) {
+    mat2 r = {0};
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 2; j++)
             for (int k = 0; k < 2; k++)
@@ -681,61 +681,61 @@ static inline mat2f mat2f_mul(mat2f a, mat2f b) {
     return r;
 }
 
-static inline mat2f mat2f_transpose(mat2f a) {
-    mat2f r;
+static inline mat2 mat2_transpose(mat2 a) {
+    mat2 r;
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 2; j++)
             r.m[i][j] = a.m[j][i];
     return r;
 }
 
-static inline vec2f mat2f_mul_vec(mat2f a, vec2f b) {
-    vec2f r = {0};
+static inline vec2 mat2_mul_vec(mat2 a, vec2 b) {
+    vec2 r = {0};
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 2; j++)
             r.v[i] += a.m[i][j] * b.v[j];
     return r;
 }
 
-// ── mat3f ──
+// ── mat3 ──
 
 typedef struct {
     union {
         float m[3][3];
         float v[9];
     };
-} mat3f;
+} mat3;
 
-static inline mat3f mat3f_identity(void) {
-    mat3f r = {0};
+static inline mat3 mat3_identity(void) {
+    mat3 r = {0};
     for (int i = 0; i < 3; i++)
         r.m[i][i] = 1.0f;
     return r;
 }
 
-static inline mat3f mat3f_add(mat3f a, mat3f b) {
-    mat3f r;
+static inline mat3 mat3_add(mat3 a, mat3 b) {
+    mat3 r;
     for (int i = 0; i < 9; i++)
         r.v[i] = a.v[i] + b.v[i];
     return r;
 }
 
-static inline mat3f mat3f_sub(mat3f a, mat3f b) {
-    mat3f r;
+static inline mat3 mat3_sub(mat3 a, mat3 b) {
+    mat3 r;
     for (int i = 0; i < 9; i++)
         r.v[i] = a.v[i] - b.v[i];
     return r;
 }
 
-static inline mat3f mat3f_scale(mat3f a, float s) {
-    mat3f r;
+static inline mat3 mat3_scale(mat3 a, float s) {
+    mat3 r;
     for (int i = 0; i < 9; i++)
         r.v[i] = a.v[i] * s;
     return r;
 }
 
-static inline mat3f mat3f_mul(mat3f a, mat3f b) {
-    mat3f r = {0};
+static inline mat3 mat3_mul(mat3 a, mat3 b) {
+    mat3 r = {0};
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             for (int k = 0; k < 3; k++)
@@ -743,61 +743,61 @@ static inline mat3f mat3f_mul(mat3f a, mat3f b) {
     return r;
 }
 
-static inline mat3f mat3f_transpose(mat3f a) {
-    mat3f r;
+static inline mat3 mat3_transpose(mat3 a) {
+    mat3 r;
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             r.m[i][j] = a.m[j][i];
     return r;
 }
 
-static inline vec3f mat3f_mul_vec(mat3f a, vec3f b) {
-    vec3f r = {0};
+static inline vec3 mat3_mul_vec(mat3 a, vec3 b) {
+    vec3 r = {0};
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             r.v[i] += a.m[i][j] * b.v[j];
     return r;
 }
 
-// ── mat4f ──
+// ── mat4 ──
 
 typedef struct {
     union {
         float m[4][4];
         float v[16];
     };
-} mat4f;
+} mat4;
 
-static inline mat4f mat4f_identity(void) {
-    mat4f r = {0};
+static inline mat4 mat4_identity(void) {
+    mat4 r = {0};
     for (int i = 0; i < 4; i++)
         r.m[i][i] = 1.0f;
     return r;
 }
 
-static inline mat4f mat4f_add(mat4f a, mat4f b) {
-    mat4f r;
+static inline mat4 mat4_add(mat4 a, mat4 b) {
+    mat4 r;
     for (int i = 0; i < 16; i++)
         r.v[i] = a.v[i] + b.v[i];
     return r;
 }
 
-static inline mat4f mat4f_sub(mat4f a, mat4f b) {
-    mat4f r;
+static inline mat4 mat4_sub(mat4 a, mat4 b) {
+    mat4 r;
     for (int i = 0; i < 16; i++)
         r.v[i] = a.v[i] - b.v[i];
     return r;
 }
 
-static inline mat4f mat4f_scale(mat4f a, float s) {
-    mat4f r;
+static inline mat4 mat4_scale(mat4 a, float s) {
+    mat4 r;
     for (int i = 0; i < 16; i++)
         r.v[i] = a.v[i] * s;
     return r;
 }
 
-static inline mat4f mat4f_mul(mat4f a, mat4f b) {
-    mat4f r = {0};
+static inline mat4 mat4_mul(mat4 a, mat4 b) {
+    mat4 r = {0};
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             for (int k = 0; k < 4; k++)
@@ -805,16 +805,16 @@ static inline mat4f mat4f_mul(mat4f a, mat4f b) {
     return r;
 }
 
-static inline mat4f mat4f_transpose(mat4f a) {
-    mat4f r;
+static inline mat4 mat4_transpose(mat4 a) {
+    mat4 r;
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             r.m[i][j] = a.m[j][i];
     return r;
 }
 
-static inline vec4f mat4f_mul_vec(mat4f a, vec4f b) {
-    vec4f r = {0};
+static inline vec4 mat4_mul_vec(mat4 a, vec4 b) {
+    vec4 r = {0};
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             r.v[i] += a.m[i][j] * b.v[j];

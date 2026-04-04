@@ -1,17 +1,19 @@
 /*
 
-linalg.h Linear Alegbra generator.
+linalg.h Linear Algebra generator.
 
 Usage:
-cc -o gen_linalg gen_linalg.c && ./gen_linalg > linalg.h
+  cc -o gen_linalg gen_linalg.c && ./gen_linalg > linalg.h
+  cc -o gen_linalg gen_linalg.c && ./gen_linalg --test > linalg_test.c
 */
 
 #include <stdio.h>
+#include <string.h>
 
 // ─── vector table ────────────────────────────────────────────────────────────
 
 typedef struct {
-    const char *name;      // "vec3f"
+    const char *name;      // "vec3"
     const char *type;      // "float"
     int         n;         // 3
     int         is_float;  // 0 for integer types; affects len return type and norm
@@ -36,14 +38,14 @@ static VecDef vecs[] = {
 
 typedef struct {
     const char *name;      // "mat3f"
-    const char *vec_name;  // "vec3f"
+    const char *vec_name;  // "vec3"
     int         n;         // 3
 } MatDef;
 
 static MatDef mats[] = {
-    { "mat2f", "vec2f", 2 },
-    { "mat3f", "vec3f", 3 },
-    { "mat4f", "vec4f", 4 },
+    { "mat2", "vec2", 2 },
+    { "mat3", "vec3", 3 },
+    { "mat4", "vec4", 4 },
 };
 
 // ─── field names ─────────────────────────────────────────────────────────────
@@ -228,9 +230,277 @@ static void emit_mat_mul_vec(MatDef *m) {
     printf("}\n\n");
 }
 
+// ─── test data ────────────────────────────────────────────────────────────────
+
+static int unsigned_a[4] = {3, 4, 5, 6};
+static int unsigned_b[4] = {1, 2, 3, 4};
+static int signed_a[4]   = {-3, 4, -5, 6};
+static int signed_b[4]   = {1, -2, 3, -4};
+
+// pythagorean triple vectors giving len=5 for each n
+static int len_vals[3][4] = {
+    {3, 4, 0, 0},    // n=2
+    {0, 3, 4, 0},    // n=3
+    {0, 0, 3, 4},    // n=4
+};
+
+// ─── test emitters ────────────────────────────────────────────────────────────
+
+static void emit_test_header(void) {
+    printf("/* generated — do not edit; run: ./gen_linalg --test > linalg_test.c */\n\n");
+    printf("#include <math.h>\n");
+    printf("#include <stdio.h>\n");
+    printf("#include \"linalg.h\"\n\n");
+    printf("#define COLOR_GREEN  \"\\033[32m\"\n");
+    printf("#define COLOR_RED    \"\\033[31m\"\n");
+    printf("#define COLOR_BOLD   \"\\033[1m\"\n");
+    printf("#define COLOR_RESET  \"\\033[0m\"\n\n");
+    printf("#define PASS(name) printf(COLOR_GREEN \"  PASS\" COLOR_RESET \"  %%s\\n\", name)\n\n");
+    printf("static int _failed = 0;\n\n");
+    printf("#define ASSERT(expr) do { \\\n");
+    printf("    if (!(expr)) { \\\n");
+    printf("        printf(COLOR_RED \"  FAIL\" COLOR_RESET \"  %%s:%%d  \" #expr \"\\n\", __FILE__, __LINE__); \\\n");
+    printf("        _failed++; \\\n");
+    printf("    } \\\n");
+    printf("} while(0)\n\n");
+    printf("#define EPS 1e-5f\n");
+    printf("#define ASSERT_FEQ(a, b) ASSERT(fabsf((a) - (b)) < EPS)\n\n");
+}
+
+static void emit_test_vec(VecDef *v) {
+    int is_signed = (v->type[0] == 'i');
+    int *a = is_signed ? signed_a : unsigned_a;
+    int *b = is_signed ? signed_b : unsigned_b;
+    int n = v->n;
+    const char *nm = v->name;
+    int *lv = len_vals[n - 2];
+
+    printf("// ─── %s (%s) ", nm, v->type);
+    printf("─────────────────────────────────────────────────────────────\n\n");
+    printf("static void test_%s(void) {\n", nm);
+
+    // declare a and b
+    if (v->is_float) {
+        printf("    %s a = {", nm);
+        for (int i = 0; i < n; i++) printf("%s%.1ff", i ? ", " : "", (float)a[i]);
+        printf("};\n");
+        printf("    %s b = {", nm);
+        for (int i = 0; i < n; i++) printf("%s%.1ff", i ? ", " : "", (float)b[i]);
+        printf("};\n\n");
+    } else {
+        printf("    %s a = {", nm);
+        for (int i = 0; i < n; i++) printf("%s%d", i ? ", " : "", a[i]);
+        printf("};\n");
+        printf("    %s b = {", nm);
+        for (int i = 0; i < n; i++) printf("%s%d", i ? ", " : "", b[i]);
+        printf("};\n\n");
+    }
+
+    // add
+    if (v->is_float) {
+        printf("    %s r = %s_add(a, b);\n", nm, nm);
+        for (int i = 0; i < n; i++)
+            printf("    ASSERT_FEQ(r.%s, %.1ff);\n", fields[i], (float)(a[i] + b[i]));
+    } else {
+        printf("    %s r = %s_add(a, b);\n", nm, nm);
+        printf("    ASSERT(");
+        for (int i = 0; i < n; i++) {
+            if (i) printf(" && ");
+            printf("r.%s == %d", fields[i], a[i] + b[i]);
+        }
+        printf(");\n");
+    }
+    printf("\n");
+
+    // sub
+    if (v->is_float) {
+        printf("    r = %s_sub(a, b);\n", nm);
+        for (int i = 0; i < n; i++)
+            printf("    ASSERT_FEQ(r.%s, %.1ff);\n", fields[i], (float)(a[i] - b[i]));
+    } else {
+        printf("    r = %s_sub(a, b);\n", nm);
+        printf("    ASSERT(");
+        for (int i = 0; i < n; i++) {
+            if (i) printf(" && ");
+            printf("r.%s == %d", fields[i], a[i] - b[i]);
+        }
+        printf(");\n");
+    }
+    printf("\n");
+
+    // scale
+    if (v->is_float) {
+        printf("    r = %s_scale(a, 2.0f);\n", nm);
+        for (int i = 0; i < n; i++)
+            printf("    ASSERT_FEQ(r.%s, %.1ff);\n", fields[i], (float)(a[i] * 2));
+    } else {
+        printf("    r = %s_scale(a, 2);\n", nm);
+        printf("    ASSERT(");
+        for (int i = 0; i < n; i++) {
+            if (i) printf(" && ");
+            printf("r.%s == %d", fields[i], a[i] * 2);
+        }
+        printf(");\n");
+    }
+    printf("\n");
+
+    // dot
+    int dot = 0;
+    for (int i = 0; i < n; i++) dot += a[i] * b[i];
+    if (v->is_float) {
+        printf("    ASSERT_FEQ(%s_dot(a, b), %.1ff);\n", nm, (float)dot);
+    } else {
+        printf("    ASSERT(%s_dot(a, b) == %d);\n", nm, dot);
+    }
+    printf("\n");
+
+    // len — pythagorean triple giving 5
+    if (v->is_float) {
+        printf("    ASSERT_FEQ(%s_len((%s){", nm, nm);
+        for (int i = 0; i < n; i++) printf("%s%.1ff", i ? ", " : "", (float)lv[i]);
+        printf("}), 5.0f);\n");
+    } else {
+        printf("    ASSERT_FEQ(%s_len((%s){", nm, nm);
+        for (int i = 0; i < n; i++) printf("%s%d", i ? ", " : "", lv[i]);
+        printf("}), 5.0f);\n");
+    }
+
+    // norm (float only)
+    if (v->is_float) {
+        printf("\n    %s nv = %s_norm((%s){", nm, nm, nm);
+        for (int i = 0; i < n; i++) printf("%s%.1ff", i ? ", " : "", (float)lv[i]);
+        printf("});\n");
+        printf("    ASSERT_FEQ(%s_len(nv), 1.0f);\n", nm);
+        for (int i = 0; i < n; i++) {
+            if (lv[i] != 0)
+                printf("    ASSERT_FEQ(nv.%s, %.1ff / 5.0f);\n", fields[i], (float)lv[i]);
+        }
+    }
+
+    // cross (n==3 only)
+    if (n == 3) {
+        printf("\n");
+        if (v->is_float) {
+            printf("    %s cx = %s_cross((%s){1.0f,0.0f,0.0f}, (%s){0.0f,1.0f,0.0f});\n",
+                   nm, nm, nm, nm);
+            printf("    ASSERT_FEQ(cx.x, 0.0f); ASSERT_FEQ(cx.y, 0.0f); ASSERT_FEQ(cx.z, 1.0f);\n");
+        } else {
+            printf("    %s cx = %s_cross((%s){1,0,0}, (%s){0,1,0});\n", nm, nm, nm, nm);
+            printf("    ASSERT(cx.x == 0 && cx.y == 0 && cx.z == 1);\n");
+        }
+    }
+
+    printf("}\n\n");
+}
+
+static void emit_test_mat(MatDef *m) {
+    int n = m->n;
+    int nn = n * n;
+    const char *mn = m->name;
+    const char *vn = m->vec_name;
+
+    printf("// ─── %s ", mn);
+    printf("─────────────────────────────────────────────────────────────────────\n\n");
+    printf("static void test_%s(void) {\n", mn);
+
+    // identity check
+    printf("    %s I = %s_identity();\n", mn, mn);
+    printf("    for (int i = 0; i < %d; i++)\n", n);
+    printf("        for (int j = 0; j < %d; j++)\n", n);
+    printf("            ASSERT_FEQ(I.m[i][j], i == j ? 1.0f : 0.0f);\n\n");
+
+    // sequential a
+    printf("    %s a = {.v = {", mn);
+    for (int i = 0; i < nn; i++) printf("%s%d", i ? "," : "", i + 1);
+    printf("}};\n\n");
+
+    // scale to zero
+    printf("    %s r = %s_scale(a, 0.0f);\n", mn, mn);
+    printf("    for (int i = 0; i < %d; i++) ASSERT_FEQ(r.v[i], 0.0f);\n\n", nn);
+
+    // add/sub roundtrip
+    printf("    %s b = %s_scale(I, 2.0f);\n", mn, mn);
+    printf("    r = %s_sub(%s_add(a, b), b);\n", mn, mn);
+    printf("    for (int i = 0; i < %d; i++) ASSERT_FEQ(r.v[i], a.v[i]);\n\n", nn);
+
+    // identity * a = a
+    printf("    r = %s_mul(I, a);\n", mn);
+    printf("    for (int i = 0; i < %d; i++) ASSERT_FEQ(r.v[i], a.v[i]);\n\n", nn);
+
+    // transpose
+    printf("    r = %s_transpose(a);\n", mn);
+    printf("    for (int i = 0; i < %d; i++)\n", n);
+    printf("        for (int j = 0; j < %d; j++)\n", n);
+    printf("            ASSERT_FEQ(r.m[i][j], a.m[j][i]);\n\n");
+
+    // identity * v = v
+    printf("    %s v = {", vn);
+    for (int i = 0; i < n; i++) printf("%s%.1ff", i ? ", " : "", (float)(i + 1));
+    printf("};\n");
+    printf("    %s rv = %s_mul_vec(I, v);\n", vn, mn);
+    for (int i = 0; i < n; i++)
+        printf("    ASSERT_FEQ(rv.%s, %.1ff);\n", fields[i], (float)(i + 1));
+    printf("\n");
+
+    // diagonal scale: diag[i] = i+2, v[i] = i+1, result[i] = (i+1)*(i+2)
+    printf("    %s ds = {.m = {", mn);
+    for (int i = 0; i < n; i++) {
+        printf("{");
+        for (int j = 0; j < n; j++) {
+            if (j) printf(",");
+            printf("%d", i == j ? i + 2 : 0);
+        }
+        printf("}");
+        if (i < n - 1) printf(",");
+    }
+    printf("}};\n");
+    printf("    rv = %s_mul_vec(ds, v);\n", mn);
+    for (int i = 0; i < n; i++)
+        printf("    ASSERT_FEQ(rv.%s, %.1ff);\n", fields[i], (float)((i + 1) * (i + 2)));
+
+    printf("}\n\n");
+}
+
+static void emit_test_main(void) {
+    int vec_count = ARRAY_COUNT(vecs);
+    int mat_count = ARRAY_COUNT(mats);
+
+    printf("// ─── main ");
+    printf("────────────────────────────────────────────────────────────────────\n\n");
+    printf("int main(void) {\n");
+    printf("    printf(COLOR_BOLD \"\\nlinalg.h tests\\n\" COLOR_RESET \"\\n\");\n\n");
+    for (int i = 0; i < vec_count; i++)
+        printf("    test_%s(); PASS(\"%s\");\n", vecs[i].name, vecs[i].name);
+    printf("\n");
+    for (int i = 0; i < mat_count; i++)
+        printf("    test_%s(); PASS(\"%s\");\n", mats[i].name, mats[i].name);
+    printf("\n");
+    printf("    if (_failed == 0)\n");
+    printf("        printf(\"\\n\" COLOR_BOLD COLOR_GREEN \"All tests passed.\" COLOR_RESET \"\\n\\n\");\n");
+    printf("    else\n");
+    printf("        printf(\"\\n\" COLOR_BOLD COLOR_RED \"%%d test(s) failed.\" COLOR_RESET \"\\n\\n\", _failed);\n");
+    printf("    return _failed != 0;\n");
+    printf("}\n");
+}
+
 // ─── main ────────────────────────────────────────────────────────────────────
 
-int main(void) {
+int main(int argc, char **argv) {
+    int gen_test = argc > 1 && strcmp(argv[1], "--test") == 0;
+
+    if (gen_test) {
+        emit_test_header();
+        int vec_count = ARRAY_COUNT(vecs);
+        for (int i = 0; i < vec_count; i++)
+            emit_test_vec(&vecs[i]);
+        int mat_count = ARRAY_COUNT(mats);
+        for (int i = 0; i < mat_count; i++)
+            emit_test_mat(&mats[i]);
+        emit_test_main();
+        return 0;
+    }
+
+    // ── generate linalg.h ────────────────────────────────────────────────────
     printf("#ifndef LINALG_H\n");
     printf("#define LINALG_H\n\n");
     printf("#include <math.h>\n");
