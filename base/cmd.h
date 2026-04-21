@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <assert.h>
 
-#include "bash.h"
+#include "base.h"
 
 // Platform detection
 #ifdef __APPLE__
