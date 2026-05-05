@@ -2,3 +2,6 @@
 gen/gen_linalg
 gen/linalg_test
 lib_test
+
+/base/string_test
+/base/arena_test
