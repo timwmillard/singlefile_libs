@@ -120,6 +120,9 @@ sp:
 	wget -O deps/sp_msvc.h https://github.com/tspader/sp/raw/refs/heads/main/sp/sp_msvc.h
 	wget -O deps/sp_prompt.h https://github.com/tspader/sp/raw/refs/heads/main/sp/sp_prompt.h
 
+toml:
+	wget -O deps/toml.h https://github.com/tspader/toml/raw/refs/heads/master/toml.h
+
 ## Games ##
 
 cute_tiled:
