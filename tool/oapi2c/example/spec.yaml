@@ -1,0 +1,271 @@
+openapi: 3.0.3
+info:
+  title: Fishing Competition API
+  version: 1.0.0
+  description: API for managing fishing competitions
+
+paths:
+  /competitors:
+    get:
+      operationId: getCompetitors
+      summary: List all competitors
+      responses:
+        '200':
+          description: List of competitors
+    post:
+      operationId: createCompetitor
+      summary: Create a competitor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Competitor'
+      responses:
+        '201':
+          description: Created
+
+  /competitors/{id}:
+    get:
+      operationId: getCompetitor
+      summary: Get a competitor by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Competitor details
+    put:
+      operationId: updateCompetitor
+      summary: Update a competitor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Updated
+    delete:
+      operationId: deleteCompetitor
+      summary: Delete a competitor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+
+  /boats:
+    get:
+      operationId: getBoats
+      summary: List all boats
+      responses:
+        '200':
+          description: List of boats
+    post:
+      operationId: createBoat
+      summary: Create a boat
+      responses:
+        '201':
+          description: Created
+
+  /boats/{id}:
+    get:
+      operationId: getBoat
+      summary: Get a boat by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Boat details
+
+  /catches:
+    get:
+      operationId: getCatches
+      summary: List all catches
+      responses:
+        '200':
+          description: List of catches
+    post:
+      operationId: createCatch
+      summary: Record a catch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Catch'
+      responses:
+        '201':
+          description: Created
+
+  /species:
+    get:
+      operationId: getSpecies
+      summary: List all species
+      responses:
+        '200':
+          description: List of species
+
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      summary: Get competition leaderboard
+      responses:
+        '200':
+          description: Leaderboard data
+
+components:
+  schemas:
+    CatchStatus:
+      type: string
+      description: Status of a catch verification
+      enum:
+        - pending
+        - verified
+        - disputed
+        - rejected
+
+    Competitor:
+      type: object
+      description: A competitor in the fishing competition
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the competitor
+        first_name:
+          type: string
+          description: Full name of the competitor
+        last_name:
+          type: string
+          description: Full name of the competitor
+        boat:
+          $ref: '#/components/schemas/Boat'
+        catches:
+          type: array
+          description: List of catches made by this competitor
+          items:
+            $ref: '#/components/schemas/Catch'
+        total_points:
+          type: number
+          description: Total points accumulated
+        created_at:
+          type: string
+          description: Timestamp when the competitor was registered
+
+    Boat:
+      type: object
+      description: A registered fishing boat
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the boat
+        name:
+          type: string
+          description: Name of the boat
+        registration:
+          type: string
+          description: Official registration number
+        crew:
+          type: array
+          description: List of crew members
+          items:
+            $ref: '#/components/schemas/Competitor'
+
+    Species:
+      type: object
+      description: A fish species that can be caught
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the species
+        name:
+          type: string
+          description: Common name of the species
+        scientific_name:
+          type: string
+          description: Scientific name of the species
+        points_per_kg:
+          type: number
+          description: Points awarded per kilogram
+        min_size_cm:
+          type: number
+          format: float
+          description: Minimum legal size in centimeters
+        tags:
+          type: array
+          description: Classification tags for this species
+          items:
+            type: string
+
+    Catch:
+      type: object
+      description: A recorded catch in the competition
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the catch
+        competitor_id:
+          type: integer
+          format: int64
+          description: ID of the competitor who made the catch
+        species:
+          $ref: '#/components/schemas/Species'
+        weight_kg:
+          type: number
+          description: Weight of the catch in kilograms
+        length_cm:
+          type: number
+          format: float
+          description: Length of the catch in centimeters
+        points:
+          type: number
+          description: Points awarded for this catch
+        caught_at:
+          type: string
+          description: Timestamp when the fish was caught
+        photos:
+          type: array
+          description: URLs of photos of the catch
+          items:
+            type: string
+        verified:
+          type: boolean
+          description: Whether the catch has been verified by officials
+        status:
+          $ref: '#/components/schemas/CatchStatus'
+
+    LeaderboardEntry:
+      type: object
+      description: An entry in the competition leaderboard
+      properties:
+        rank:
+          type: integer
+          format: int32
+          description: Current ranking position
+        competitor:
+          $ref: '#/components/schemas/Competitor'
+        total_catches:
+          type: integer
+          format: int32
+          description: Total number of catches
+        total_weight_kg:
+          type: number
+          description: Total weight of all catches
+        total_points:
+          type: number
+          description: Total points accumulated
