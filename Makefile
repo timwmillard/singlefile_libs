@@ -45,7 +45,7 @@ json:
 	wget -O deps/json.h https://raw.githubusercontent.com/sheredom/json.h/refs/heads/master/json.h
 
 jsonc:
-	wget -O deps/json.c https://gitlab.com/bztsrc/jsonc/-/raw/master/jsonc.c
+	wget -O deps/jsonc.c https://gitlab.com/bztsrc/jsonc/-/raw/master/jsonc.c
 
 jsmn:
 	wget -O deps/jsmn.h https://raw.githubusercontent.com/zserge/jsmn/refs/heads/master/jsmn.h
