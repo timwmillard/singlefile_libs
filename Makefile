@@ -112,7 +112,7 @@ quickjs:
 
 sp:
 	wget -O deps/sp.h https://github.com/tspader/sp/raw/refs/heads/main/sp.h
-	wget -O deps/sp_assert.h https://github.com/tspader/sp/raw/refs/heads/main/sp/sp_asset.h
+	wget -O deps/sp_asset.h https://github.com/tspader/sp/raw/refs/heads/main/sp/sp_asset.h
 	wget -O deps/sp_elf.h https://github.com/tspader/sp/raw/refs/heads/main/sp/sp_elf.h
 	wget -O deps/sp_glob.h https://github.com/tspader/sp/raw/refs/heads/main/sp/sp_glob.h
 	wget -O deps/sp_macho.h https://github.com/tspader/sp/raw/refs/heads/main/sp/sp_macho.h
