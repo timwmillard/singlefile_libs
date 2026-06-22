@@ -18,7 +18,7 @@ stb:
 	wget -O deps/stb_truetype.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_truetype.h
 	wget -O deps/stb_image_write.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image_write.h
 	wget -O deps/stb_image_resize2.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image_resize2.h
-	wget -O deps/stb_perline.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_perlin.h
+	wget -O deps/stb_perlin.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_perlin.h
 	wget -O deps/stb_tilemap_editor.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_tilemap_editor.h
 	wget -O deps/stb_textedit.h https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_textedit.h
 
